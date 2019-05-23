@@ -3,6 +3,8 @@ const express = require('express');
 const bodyParser= require('body-parser');
 const mongoose = require('mongoose');
 const keys = require('./config/keys');
+require('./models/Users');
+
 
 
 
@@ -17,6 +19,7 @@ mongoose.connect(keys.mongoURI, { useNewUrlParser: true })
 const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(require('./routes'));
 const PORT = process.env.PORT || 5000;
 
 app.get('/', (req, res) => {
