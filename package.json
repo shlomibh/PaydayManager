@@ -1,0 +1,27 @@
+{
+  "name": "finalproject",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shlomibh/PaydayManager.git"
+  },
+  "author": "Shlomi Ben Hamo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shlomibh/PaydayManager/issues"
+  },
+  "homepage": "https://github.com/shlomibh/PaydayManager#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.0"
+  }
+}
