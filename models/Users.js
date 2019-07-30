@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 const uniqueValidator = require("mongoose-unique-validator");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
-const secret = require("../config").secret;
+const secret = require("../config/keys").secret;
 
 const UserSchema = new Schema(
   {
@@ -11,7 +11,7 @@ const UserSchema = new Schema(
       type: String,
       lowercase: true,
       required: [true, "cant't be blank"],
-      match: [/^[a-zA-Z0-9]$/, "is invalid"],
+      match: [/^[a-zA-Z0-9]/, "is invalid"],
       index: true,
       unique: true
     },
@@ -29,7 +29,7 @@ const UserSchema = new Schema(
       minlength: 10,
       type: String,
       required: true,
-      match: [/^[0-9]$/, "Only Number allowed"]
+      match: [/^[0-9]/, "Only Number allowed"]
     },
     department: {
       type: String,
@@ -79,13 +79,14 @@ UserSchema.methods.validPassword = function(password) {
   return this.hash === hash;
 };
 
-UserSchema.method.getrateJWT = function() {
+UserSchema.methods.generateJWT = function() {
   const today = new Date();
   const exp = new Date(today);
   exp.setDate(today.getDate() + 60);
 
   return jwt.sign(
     {
+      iss:'PayDayManager',// who do it
       id: this._id,
       username: this.username,
       exp: parseInt(exp.getTime() / 1000)

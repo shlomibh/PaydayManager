@@ -1,31 +1,28 @@
 //http package
-const express = require('express');
+const express = require("express");
 //const bodyParser= require('body-parser');
-const mongoose = require('mongoose');
-const keys = require('./config/keys');
-require('./models/Users');
-require('./config/passport');
+const mongoose = require("mongoose");
+const keys = require("./config/keys");
+require("./models/Users");
+require("./config/passport");
 
-
-
-mongoose.connect(keys.mongoURI, { useNewUrlParser: true })
-.then(() => {
-    console.log('MongoDB is connected');
-})
-.catch((err) => {
-    console.log('erro occured in connection to mongo');
+mongoose
+  .connect(keys.mongoURI, { useNewUrlParser: true })
+  .then(() => {
+    console.log("MongoDB is connected");
+  })
+  .catch(err => {
+    console.log("erro occured in connection to mongo");
     console.log(err);
-});
+  });
 const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use(require('./routes'));
+app.use(require("./routes"));
 
 const PORT = process.env.PORT || 5000;
 
-
-
 app.listen(PORT, () => {
-    console.log(`Server listennig on http://localhost:${PORT}`)
+  console.log(`Server listennig on http://localhost:${PORT}`);
 });
