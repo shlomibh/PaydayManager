@@ -26,3 +26,5 @@ passport.use(
     }
   )
 );
+const LoginRequired = passport.authenticate ('jwt',{session:false});
+module.exports = LoginRequired;
