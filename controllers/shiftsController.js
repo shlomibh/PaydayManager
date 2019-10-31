@@ -1,29 +1,61 @@
 const httpCodes = require('http-status-codes');
+const User = require('../models/Users');
+const Shift = require('../models/Shifts');
 
 async function postShift(req, res, next) {
     try {
-        const shift = req.body;
+        const shift = req.body.shift;
+        const id = shift.employeeId;
+        const user = await User.findOne({
+            _id: id
+        });
+        if (!user) return res.status(httpCodes.CONFLICT).send("there is no such user");
+        const department = user.department;
+        shift.department = department;
         console.log(shift);
+        const shiftFromDb = await Shift.create(shift);
+        if (!shiftFromDb) return res.status(httpCodes.FORBIDDEN).send("cannot create this shift");
+        console.log(shiftFromDb);
+        return res.status(httpCodes.OK).send(shiftFromDb);
+    } catch (error) {
+        next(error);
+    }
+}
 
-        const user = await User.findOne({ email });
-        if (!user || !user.validPassword(password)) {
-            return res.status(httpCodes.UNAUTHORIZED).send("email or password not valid");
-        } else {
-            const token = await user.generateJWT();
-            const credentialToRet = {
-                id: user._id,
-                username: user.username,
-                token
-            }
-            console.log(req);
-            return res.status(httpCodes.OK).send(credentialToRet);
-        }
+async function getShifts(req, res, next) {
+    try {
+        const employeeId = req.params.id;
+        const shifts = await Shift.find({
+            employeeId: employeeId
+        });
+        if (!shifts) return res.status(httpCodes.FORBIDDEN).send("there is no shifts to that employee");
+        console.log(shifts);
+        return res.status(httpCodes.OK).send(shifts);
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function deleteShift(req, res, next) {
+    try {
+        const shiftId = req.params.id;
+        const shift = await Shift.findOne({
+            _id: shiftId
+        });
+        if (!shift) return res.status(httpCodes.FORBIDDEN).send("There is no such shift");
+        console.log(shift);
+        await Shift.deleteOne({
+            _id: shift._id
+        });
+        return res.status(httpCodes.NO_CONTENT).send("success");
     } catch (error) {
         next(error);
     }
 }
 
 const shiftsControllers = {
-    postShift
+    postShift,
+    getShifts,
+    deleteShift
 };
 module.exports = shiftsControllers;
