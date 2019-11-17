@@ -5,10 +5,11 @@ const User = mongoose.model("User");
 const { ExtractJwt } = require("passport-jwt");
 const secret = require("../config/keys").secret;
 //check if the user allow
+// שיטת אימות - passport
 passport.use(
   new JwtStrategie(
     {
-      jwtFromRequest: ExtractJwt.fromHeader('authorization'),
+      jwtFromRequest: ExtractJwt.fromHeader('authorization'), //  jwtהדרך שבא אני מייבא את ה 
       secretOrKey:secret
     },
     async (payload, done) => {
