@@ -12,6 +12,7 @@ async function postShift(req, res, next) {
         if (!user) return res.status(httpCodes.CONFLICT).send("there is no such user");
         const department = user.department;
         shift.department = department;
+        shift.submitted = false;
         console.log(shift);
         const shiftFromDb = await Shift.create(shift);
         if (!shiftFromDb) return res.status(httpCodes.FORBIDDEN).send("cannot create this shift");
@@ -36,22 +37,22 @@ async function getShifts(req, res, next) {
     }
 }
 
-async function getShiftsPerMonth(req, res, next) {
-    try {
-        const employeeId = req.params.id;
-        const month = req.params.month;
-        const year = req.params.year;
-        const shifts = await Shift.find({
-            employeeId: employeeId
-        });
-        if (!shifts) return res.status(httpCodes.FORBIDDEN).send("there is no shifts to that employee");
-        const filterredShifts = shifts.filter(s => s.date.split('/')[1] === month); //Shlomi: [0]
-        console.log(filterredShifts);
-        return res.status(httpCodes.OK).send(filterredShifts);
-    } catch (error) {
-        next(error);
+    async function getShiftsPerMonth(req, res, next) {
+        try {
+            const employeeId = req.params.id;
+            const month = req.params.month;
+            const year = req.params.year;
+            const shifts = await Shift.find({
+                employeeId: employeeId
+            });
+            if (!shifts) return res.status(httpCodes.FORBIDDEN).send("there is no shifts to that employee");
+            const filterredShifts = shifts.filter(s => s.date.split('/')[0] === month); //Shlomi: [0]
+            console.log(filterredShifts);
+            return res.status(httpCodes.OK).send(filterredShifts);
+        } catch (error) {
+            next(error);
+        }
     }
-}
 
 async function deleteShift(req, res, next) {
     try {

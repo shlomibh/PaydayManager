@@ -14,6 +14,7 @@ async function login(req, res, next) {
             const credentialToRet = {
                     id: user._id,
                     username: user.username,
+                    role: user.role,
                     token
                 }
                 // console.log(req);
@@ -24,7 +25,26 @@ async function login(req, res, next) {
     }
 }
 
+async function getUsersDepartment(req, res, next) {
+    try {
+        const id = req.params.id;
+        console.log(id);
+
+        const user = await User.findOne({ _id: id });
+        if (!user) {
+            return res.status(httpCodes.UNAUTHORIZED).send("no such user");
+        }
+        const usersDepartment = await User.find({ department: user.department });
+        if(!usersDepartment)
+            return res.status(httpCodes.CONFLICT).send("can't be empty department");
+        return res.status(httpCodes.OK).send(usersDepartment);
+    } catch (error) {
+        next(error);
+    }
+}
+
 const usersControllers = {
-    login
+    login,
+    getUsersDepartment
 };
 module.exports = usersControllers;

@@ -24,6 +24,9 @@ const ShiftSchema = new Schema({
     absent: {  //היעדרות
         type: String
     },
+    submitted: {
+        type: Boolean
+    }
 });
 
 ShiftSchema.plugin(uniqueValidator, {
