@@ -45,7 +45,7 @@ async function getShiftsPerMonth(req, res, next) {
             employeeId: employeeId
         });
         if (!shifts) return res.status(httpCodes.FORBIDDEN).send("there is no shifts to that employee");
-        const filterredShifts = shifts.filter(s => s.date.split('/')[0] === month);
+        const filterredShifts = shifts.filter(s => s.date.split('/')[1] === month); //Shlomi: [0]
         console.log(filterredShifts);
         return res.status(httpCodes.OK).send(filterredShifts);
     } catch (error) {
