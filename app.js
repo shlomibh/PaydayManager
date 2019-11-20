@@ -8,13 +8,14 @@ require("./config/passport");
 cors = require('cors');
 // const Users = require('./models/Users');
 
+// התחברות למונגו 
 mongoose
   .connect(keys.mongoURI, { useNewUrlParser: true })
   .then(() => {
-    console.log("MongoDB is connected");
+    console.log("MongoDB is connected"); // אם ההתחברות תקינה מוציא הודעה בהתאם
   })
   .catch(err => {
-    console.log("erro occured in connection to mongo");
+    console.log("erro occured in connection to mongo"); //אחרת מוציא הודעה שגיאה בהתאם
     console.log(err);
   });
 const app = express();
@@ -23,11 +24,11 @@ app.use(express.json());
 
 app.use(require("./routes"));
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5000; //הפורט איתו התבצעו הפניות לשרת
 
 
 var originsWhitelist = [
-  'http://localhost:4200',      //this is my front-end url for development
+  'http://localhost:4200',      //שם השרת
 ];
 var corsOptions = {
   origin: function(origin, callback){
@@ -36,7 +37,7 @@ var corsOptions = {
   },
   credentials:true
 }
-//here is the magic
+
 app.use(cors(corsOptions));
 
 app.use(function(req, res, next) {
