@@ -1,5 +1,7 @@
 const httpCodes = require('http-status-codes');
 const User = require('../models/Users');
+const jwt = require('jsonwebtoken');
+
 // בדיקת התחברות המתמש באמצעות דוא״ל וסיסמא
 async function login(req, res, next) {
     try {
@@ -26,6 +28,31 @@ async function login(req, res, next) {
         next(error); 
     }
 }
+
+async function register(req, res, next) {
+    try {
+        const employee = req.body.employee;
+
+        const user = await User.findOne({ email: employee.email });  //מחפש אלמנט אחד-דוא״ל של המשתמש
+        // בודק האם הדוא״ל של המשתמש או הסיסמא שרשם תקינים
+        if (user) {
+            return res.status(httpCodes.CONFLICT).send("user already existed"); // אם לא-מחזיר הודעה בהתאם
+        } else {
+            const employeeFromDb = await User.create(employee);
+            if(!employeeFromDb){
+                return res.status(httpCodes.CONFLICT).send("cannot insert employee");
+            }
+           employeeFromDb.setPassword(employee.password);
+           employeeFromDb.generateJWT();
+           employeeFromDb.save();
+                // מחזיר הודעה בהתאם שההתחברות תקינה
+            return res.status(httpCodes.OK).send(employeeFromDb);
+        }
+    } catch (error) { // מחזיר הודעת שגיאה במידה ויש בעיה אחרת
+        next(error); 
+    }
+}
+
 // פונקציה שמחזירה את המחלקה אליה שייך המרצה
 async function getUsersDepartment(req, res, next) {
     try {
@@ -47,6 +74,7 @@ async function getUsersDepartment(req, res, next) {
 //הכרזה וייצוא של הפונקציות
 const usersControllers = {
     login,
+    register,
     getUsersDepartment
 };
 module.exports = usersControllers;

@@ -48,9 +48,6 @@ const UserSchema = new Schema(
       index: true,
       unique: true
     },
-    image: {
-      type: String
-    },
     id: {  //מספר תעודת זהות
       type: String,
       required: true,
@@ -109,7 +106,6 @@ UserSchema.methods.toAuthJSON = function() {
     lastName: this,
     department: this.department,
     token: this.generateJWT(),
-    image: this.image
   };
 };
 
