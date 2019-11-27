@@ -53,6 +53,19 @@ async function register(req, res, next) {
     }
 }
 
+async function getLectorsList(req, res, next) {
+    try {
+        const lectors = await User.find({ role: 'lector' }); // בודק את תעודת זהות המתקבלת ומחפש אותה
+        if (!lectors) {  //אם המשתמש לא קיים מחזיר הודעה בהתאם
+            return res.status(httpCodes.UNAUTHORIZED).send("no such user");
+        }
+        console.log(lectors);
+        return res.status(httpCodes.OK).send(lectors);
+    } catch (error) {
+        next(error);
+    }
+}
+
 // פונקציה שמחזירה את המחלקה אליה שייך המרצה
 async function getUsersDepartment(req, res, next) {
     try {
@@ -75,6 +88,7 @@ async function getUsersDepartment(req, res, next) {
 const usersControllers = {
     login,
     register,
+    getLectorsList,
     getUsersDepartment
 };
 module.exports = usersControllers;

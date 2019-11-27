@@ -53,6 +53,29 @@ async function getShifts(req, res, next) {
             next(error);
         }
     }
+
+    async function submitAll(req, res, next) {
+        try {
+           const employeeId = req.body.employeeId; // משמרת המשתמש 
+           const {month , year} = req.body.date;
+           const user = await User.findOne({  //מציאת המשתמש לפי מספר הזדהות שלו
+                _id: employeeId
+           });
+            if (!user) return res.status(httpCodes.CONFLICT).send("there is no such user"); // בודק אם קיים משתמש כזה לפי תעודת זהות שלו
+           const shifts = await Shift.find({ employeeId: employeeId });
+           if(!shifts) return res.status(httpCodes.CONFLICT).send("no shifts");
+           const filterredShiftsbyMonth = shifts.filter( s => s.date.split('/')[0] === `${month}`);
+           const filterredShifts = filterredShiftsbyMonth.filter( s => s.date.split('/')[2] === `${year}`);
+           filterredShifts.forEach(element => {
+                element.submitted = true;
+                element.save();
+           });
+            return res.status(httpCodes.OK).send(true); // אם הכל תקין מחזיר את הדיווח של המשמרת
+        } catch (error) {
+            next(error);
+        }
+    }
+
 //מחיקת עדכון של המשתמש
 async function deleteShift(req, res, next) {
     try {
@@ -75,6 +98,7 @@ const shiftsControllers = {
     postShift,
     getShifts,
     getShiftsPerMonth,
+    submitAll,
     deleteShift
 };
 module.exports = shiftsControllers
