@@ -66,7 +66,10 @@ async function getUsersDepartment(req, res, next) {
         const usersDepartment = await User.find({ department: user.department });  // מכניס למשתנה אם המחלקה אליה שייך המשתמש-במידה וההתחברות תקינה
         if(!usersDepartment) // אם לא מצא מחלקה מחזיר הודעת שגיאה בהתאם ואם מצא-מחזיר את המחלקה אליה שייך
             return res.status(httpCodes.CONFLICT).send("can't be empty department");
-        return res.status(httpCodes.OK).send(usersDepartment);
+        const lectorsDepartment = usersDepartment.filter( u => u.role === 'lector');
+        if(!lectorsDepartment)
+            return res.status(httpCodes.CONFLICT).send("there are no lectors in this department");
+        return res.status(httpCodes.OK).send(lectorsDepartment);
     } catch (error) {
         next(error);
     }
