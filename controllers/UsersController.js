@@ -7,8 +7,6 @@ async function login(req, res, next) {
     try {
         const { email, password } = req.body;
         console.log(email, password);
-
-        
         const user = await User.findOne({ email });  //מחפש אלמנט אחד-דוא״ל של המשתמש
         // בודק האם הדוא״ל של המשתמש או הסיסמא שרשם תקינים
         if (!user || !user.validPassword(password)) {
@@ -32,7 +30,6 @@ async function login(req, res, next) {
 async function register(req, res, next) {
     try {
         const employee = req.body.employee;
-
         const user = await User.findOne({ email: employee.email });  //מחפש אלמנט אחד-דוא״ל של המשתמש
         // בודק האם הדוא״ל של המשתמש או הסיסמא שרשם תקינים
         if (user) {
@@ -74,10 +71,25 @@ async function getUsersDepartment(req, res, next) {
         next(error);
     }
 }
+
+async function getUserById(res, req, next, id) {
+    try {
+        console.log(id);
+
+        const user = await User.findOne({ _id: id }); // בודק את תעודת זהות המתקבלת ומחפש אותה
+        if (!user) {  //אם המשתמש לא קיים מחזיר הודעה בהתאם
+            return null;
+        }
+        return user;
+    } catch (error) {
+        next(error);
+    }
+}
 //הכרזה וייצוא של הפונקציות
 const usersControllers = {
     login,
     register,
-    getUsersDepartment
+    getUsersDepartment,
+    getUserById
 };
 module.exports = usersControllers;
