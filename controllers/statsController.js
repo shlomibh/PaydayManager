@@ -61,9 +61,39 @@ async function lectorStats(req, res, next) {
         finalArrayResult.push(oFinalResult);
 
     // FOR NOW!!! //
-        return res.status(httpCodes.OK).send(finalArrayResult);
-
-            // case 'extraHours':
+    const submittedShifts = filteredShifts.filter(s => s.submitted === true );
+    const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`${month}/26/${year}`));
+    const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`${month}/26/${year}`));
+    // const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`11/26/${year}`));    //oren
+    // const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`11/26/${year}`));  //oren
+    if(!inTimeShifts)
+        return res.status(httpCodes.OK).send(null);
+    const inTimeRes = getStats('lector', inTimeShifts);
+    if(!inTimeRes) 
+        return res.status(httpCodes.OK).send(null);
+    const notInTimeRes = getStats('lector', notInTimeShifts);
+    if(!notInTimeRes) 
+        return res.status(httpCodes.OK).send(null);
+    timeRes = {
+        maxID: inTimeRes.maxID,
+        maxCount: inTimeRes.maxCount,
+        minID: notInTimeRes.maxID,
+        minCount: notInTimeRes.maxCount
+    };
+    const itmaxUser = await userController.getUserById(req, res, next, timeRes.maxID);
+    const itminUser = await userController.getUserById(req, res, next, timeRes.minID);
+    const itFinalResult = {
+        maxUser: itmaxUser, 
+        maxCount: timeRes.maxCount,
+        minUser: itminUser,
+        minCount: timeRes.minCount
+    };
+    console.log(itFinalResult);
+    finalArrayResult.push(itFinalResult);
+    
+    return res.status(httpCodes.OK).send(finalArrayResult);
+         
+    // case 'extraHours':
                 const extraShifts = filteredShifts.filter(s => s.absent === 'שעות נוספות'); //need to create new
                 if(!extraShifts) 
                     return res.status(httpCodes.OK).send(null);
@@ -81,28 +111,7 @@ async function lectorStats(req, res, next) {
                     console.log(eFinalResult);
                     finalArrayResult.push(eFinalResult);
                 //     return res.status(httpCodes.OK).send(eFinalResult);
-                // case 'inTime': 
-                const inTimeShifts = filteredShifts.filter();//s => s.lectorSubmittedDate <= '26/${month}/${year}'); 
-                if(!inTimeShifts) 
-                    return res.status(httpCodes.OK).send(null);
-                const inTimeRes = getStats('lector', inTimeShifts);
-                if(!inTimeRes) 
-                    return res.status(httpCodes.OK).send(null);
-                const itmaxUser = await userController.getUserById(req, res, next, inTimeRes.maxID);
-                const itminUser = await userController.getUserById(req, res, next, inTimeRes.minID);
-                const itFinalResult = {
-                    maxUser: itmaxUser, 
-                    maxCount: inTimeRes.maxCount,
-                    minUser: itminUser,
-                    minCount: inTimeRes.minCount
-                };
-                console.log(itFinalResult);
-                finalArrayResult.push(itFinalResult);
-                return res.status(httpCodes.OK).send(itFinalResult);
-            
-                // default:
-                // return res.status(httpCodes.BAD_REQUEST).send("wrong input");
-        // }
+                
     } catch (error) {
         next(error);
     }
@@ -143,17 +152,28 @@ async function departmentStats(req, res, next) {
         finalArrayResult.push(offRes);
         // FOR NOW!!! //
         const submittedShifts = filteredShifts.filter(s => s.submitted === true );
-        const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`${month}/26/${year}`));
-        console.log(inTimeShifts);
+        const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`${month}/26/${year}`));
+        const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`${month}/26/${year}`));
+        // const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`11/26/${year}`));    //oren
+        // const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`11/26/${year}`));  //oren
         if(!inTimeShifts)
             return res.status(httpCodes.OK).send(null);
         const inTimeRes = getStats('department', inTimeShifts);
         if(!inTimeRes) 
             return res.status(httpCodes.OK).send(null);
-        finalArrayResult.push(inTimeRes);
+        const notInTimeRes = getStats('department', notInTimeShifts);
+        if(!notInTimeRes) 
+            return res.status(httpCodes.OK).send(null);
+        timeRes = {
+            maxID: inTimeRes.maxID,
+            maxCount: inTimeRes.maxCount,
+            minID: notInTimeRes.maxID,
+            minCount: notInTimeRes.maxCount
+        };
+        console.log(timeRes);
+        finalArrayResult.push(timeRes);
         return res.status(httpCodes.OK).send(finalArrayResult);
 
-            
         // case 'extraHours':
             const extraShifts = filteredShifts.filter(s => s.absent === 'שעות נוספות'); //need to create new
             if(!extraShifts) 
@@ -161,9 +181,7 @@ async function departmentStats(req, res, next) {
             const extraRes = getStats('department', extraShifts);
             if(!extraRes) 
                 return res.status(httpCodes.OK).send(null);
-        //     return res.status(httpCodes.OK).send(extraRes);
-        // case 'inTime':
-            
+        //     return res.status(httpCodes.OK).send(extraRes);            
 
     } catch (error) {
         next(error);
