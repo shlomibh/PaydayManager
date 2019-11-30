@@ -13,6 +13,8 @@ async function postShift(req, res, next) {
         const department = user.department; //מחלקה אליה שייך המשתמש
         shift.department = department; //המחלקה של אותו דיווח
         shift.submitted = false; // דווח של ראש מחלקה על מרצה שדיווח בזמן
+        shift.lectorSubmitted = false;
+        shift.dateLectorSubmit= '';
         console.log(shift);
         const shiftFromDb = await Shift.create(shift); //משמרות הקיימות-מבסיס הנתונים
         if (!shiftFromDb) return res.status(httpCodes.FORBIDDEN).send("cannot create this shift"); //אם המשמרת לא קיימת בבסיס הנתונים מוציא הודעה בהתאם
@@ -62,13 +64,26 @@ async function getShifts(req, res, next) {
                 _id: employeeId
            });
             if (!user) return res.status(httpCodes.CONFLICT).send("there is no such user"); // בודק אם קיים משתמש כזה לפי תעודת זהות שלו
+            const role = user.role;
            const shifts = await Shift.find({ employeeId: employeeId });
            if(!shifts) return res.status(httpCodes.CONFLICT).send("no shifts");
            const filterredShiftsbyMonth = shifts.filter( s => s.date.split('/')[0] === `${month}`);
            const filterredShifts = filterredShiftsbyMonth.filter( s => s.date.split('/')[2] === `${year}`);
            filterredShifts.forEach(element => {
-                element.submitted = true;
-                element.save();
+               if(element.lectorSubmitted === false){
+                if(role === 'lector'){
+                    element.lectorSubmitted = true;
+                    element.dateLectorSubmit = new Date().toLocaleDateString();
+                }
+                else{
+                        element.lectorSubmitted = true;
+                        if(element.dateLectorSubmit === '')
+                            element.dateLectorSubmit = new Date().toLocaleDateString();
+                        element.submitted = true;
+                        element.save();
+                }
+            }
+                
            });
             return res.status(httpCodes.OK).send(true); // אם הכל תקין מחזיר את הדיווח של המשמרת
         } catch (error) {

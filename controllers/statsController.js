@@ -81,7 +81,7 @@ async function lectorStats(req, res, next) {
                     console.log(eFinalResult);
                     finalArrayResult.push(eFinalResult);
                 //     return res.status(httpCodes.OK).send(eFinalResult);
-                // case 'inTime':
+                // case 'inTime': 
                 const inTimeShifts = filteredShifts.filter();//s => s.lectorSubmittedDate <= '26/${month}/${year}'); 
                 if(!inTimeShifts) 
                     return res.status(httpCodes.OK).send(null);
@@ -142,6 +142,15 @@ async function departmentStats(req, res, next) {
             return res.status(httpCodes.OK).send(null);
         finalArrayResult.push(offRes);
         // FOR NOW!!! //
+        const submittedShifts = filteredShifts.filter(s => s.submitted === true );
+        const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`${month}/26/${year}`));
+        console.log(inTimeShifts);
+        if(!inTimeShifts)
+            return res.status(httpCodes.OK).send(null);
+        const inTimeRes = getStats('department', inTimeShifts);
+        if(!inTimeRes) 
+            return res.status(httpCodes.OK).send(null);
+        finalArrayResult.push(inTimeRes);
         return res.status(httpCodes.OK).send(finalArrayResult);
 
             
@@ -154,12 +163,7 @@ async function departmentStats(req, res, next) {
                 return res.status(httpCodes.OK).send(null);
         //     return res.status(httpCodes.OK).send(extraRes);
         // case 'inTime':
-            const inTimeShifts = filteredShifts.filter();//s => s.lectorSubmittedDate <= '26/${month}/${year}'); 
-            if(!inTimeShifts) 
-                return res.status(httpCodes.OK).send(null);
-            const inTimeRes = getStats('department', inTimeShifts);
-            if(!inTimeRes) 
-                return res.status(httpCodes.OK).send(null);
+            
 
     } catch (error) {
         next(error);

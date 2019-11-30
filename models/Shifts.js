@@ -26,6 +26,12 @@ const ShiftSchema = new Schema({
     },
     submitted: {
         type: Boolean
+    },
+    lectorSubmitted: {
+        type: Boolean
+    },
+    dateLectorSubmit: {
+        type: String
     }
 });
 
