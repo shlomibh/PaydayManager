@@ -189,7 +189,7 @@ async function departmentStats(req, res, next) {
 }
 
 function getFilteredShifts(shifts, month, year) {
-    month='11'; //need to remove!!!!
+   // month='11'; //need to remove!!!!
     const filterredShifts = shifts.filter(s => s.date.split('/')[0] === month); /// ״מסנן משמרות לפי חודש :הפונקציה לוקחת את התאריך שהתקבל ומפרקת אותה למערך לפי התו ומחזירה את הערך שבמקום הראשון    Shlomi: [0]
     if(!filterredShifts) 
         return res.status(httpCodes.FORBIDDEN).send("no shifts");
