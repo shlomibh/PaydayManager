@@ -92,26 +92,6 @@ async function lectorStats(req, res, next) {
     finalArrayResult.push(itFinalResult);
     
     return res.status(httpCodes.OK).send(finalArrayResult);
-         
-    // case 'extraHours':
-                const extraShifts = filteredShifts.filter(s => s.absent === 'שעות נוספות'); //need to create new
-                if(!extraShifts) 
-                    return res.status(httpCodes.OK).send(null);
-                const extraRes = getStats('lector', extraShifts);
-                if(!extraRes) 
-                    return res.status(httpCodes.OK).send(null);
-                    const emaxUser = await userController.getUserById(req, res, next, extraRes.maxID);
-                    const eminUser = await userController.getUserById(req, res, next, extraRes.minID);
-                    const eFinalResult = {
-                        maxUser: emaxUser, 
-                        maxCount: extraRes.maxCount,
-                        minUser: eminUser,
-                        minCount: extraRes.minCount
-                    };
-                    console.log(eFinalResult);
-                    finalArrayResult.push(eFinalResult);
-                //     return res.status(httpCodes.OK).send(eFinalResult);
-                
     } catch (error) {
         next(error);
     }
@@ -173,16 +153,6 @@ async function departmentStats(req, res, next) {
         console.log(timeRes);
         finalArrayResult.push(timeRes);
         return res.status(httpCodes.OK).send(finalArrayResult);
-
-        // case 'extraHours':
-            const extraShifts = filteredShifts.filter(s => s.absent === 'שעות נוספות'); //need to create new
-            if(!extraShifts) 
-                return res.status(httpCodes.OK).send(null);
-            const extraRes = getStats('department', extraShifts);
-            if(!extraRes) 
-                return res.status(httpCodes.OK).send(null);
-        //     return res.status(httpCodes.OK).send(extraRes);            
-
     } catch (error) {
         next(error);
     }
@@ -262,16 +232,6 @@ function getStats(identify, shifts) {
     }
     const res = {maxID: maxID, maxCount: max, minID: minID, minCount: min};
     return res;
-}
-
-
-async function extraHoursStats(identify, shifts) {
-    let max;
-    let maxID;
-    let min;
-    let minID;
-    //const extraShifts = shifts.filter(s => s.absent === 'ביטול'); 
-    //need to calculate by user or department
 }
 
 const statsControllers = {
