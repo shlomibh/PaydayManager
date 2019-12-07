@@ -83,29 +83,12 @@ async function getUsersDepartment(req, res, next) {
     }
 }
 
-async function getUserById(res, req, next, id) {
-    try {
-        console.log(id);
-
-        const user = await User.findOne({
-            _id: id
-        }); // בודק את תעודת זהות המתקבלת ומחפש אותה
-        if (!user) { //אם המשתמש לא קיים מחזיר הודעה בהתאם
-            return null;
-        }
-        return user;
-    } catch (error) {
-        next(error);
-    }
-}
 
 async function getUserDetailsById(res, req, next) {
     try {
-        console.log('getuser');
-        console.log(req.body);
-        // for (let i = 0; i < 10000; i++)
-        //     console.log(req.body);
-        const id = req.body.user;
+        console.log(req);
+        console.log(req.params);
+        const id = req.params.id;
         console.log(id);
 
         const user = await User.findOne({
@@ -138,6 +121,23 @@ async function updateUser(res, req, next) {
         userFromDb.save();
         
         return res.status(httpCodes.OK).send(userFromDb);
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+async function getUserById(res, req, next, id) {
+    try {
+        console.log(id);
+
+        const user = await User.findOne({
+            _id: id
+        }); // בודק את תעודת זהות המתקבלת ומחפש אותה
+        if (!user) { //אם המשתמש לא קיים מחזיר הודעה בהתאם
+            return null;
+        }
+        return user;
     } catch (error) {
         next(error);
     }

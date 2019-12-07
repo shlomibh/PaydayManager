@@ -62,10 +62,10 @@ async function lectorStats(req, res, next) {
 
     // FOR NOW!!! //
     const submittedShifts = filteredShifts.filter(s => s.submitted === true );
-    // const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`${month}/26/${year}`));
-    // const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`${month}/26/${year}`));
-    const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`11/26/${year}`));    //oren
-    const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`11/26/${year}`));  //oren
+    const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`${month}/26/${year}`));
+    const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`${month}/26/${year}`));
+    //const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`11/26/${year}`));    //oren
+    //const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`11/26/${year}`));  //oren
     if(!inTimeShifts)
         return res.status(httpCodes.OK).send(null);
     const inTimeRes = getStats('lector', inTimeShifts);
@@ -101,7 +101,7 @@ async function departmentStats(req, res, next) {
     try {
         const month = req.params.month; // החודש אותו ביקש המשתמש לקבל
         const year = req.params.year; //השנה אותה ביקש המשתמש לבקש
-        const finalArrayResult = [];
+        const finalArrayResultdep = [];
 
         const shifts = await Shift.find({ submitted: true });
         if (!shifts) return res.status(httpCodes.FORBIDDEN).send("there is no shifts"); // אם אין משמרות מחזיר הודעת שגיאה
@@ -111,31 +111,37 @@ async function departmentStats(req, res, next) {
         if(!canceledShifts) 
             return res.status(httpCodes.OK).send(null);
         const canceledRes = getStats('department', canceledShifts);
+        console.log(canceledRes);
         if(!canceledRes) 
             return res.status(httpCodes.OK).send(null);
-        finalArrayResult.push(canceledRes);
-
+        finalArrayResultdep.push(canceledRes);
+        console.log('cancel'); 
+        console.log(finalArrayResultdep);
         const sickShifts = filteredShifts.filter(s => s.absent === 'מחלה');
         if(!sickShifts) 
             return res.status(httpCodes.OK).send(null);
         const sickRes = getStats('department', sickShifts);
         if(!sickRes) 
             return res.status(httpCodes.OK).send(null);
-        finalArrayResult.push(sickRes);
-
+        finalArrayResultdep.push(sickRes);
+        console.log('sick'); 
+        console.log(finalArrayResultdep);
         const offShifts = filteredShifts.filter(s => s.absent === 'חופש');
         if(!offShifts) 
             return res.status(httpCodes.OK).send(null);
         const offRes = getStats('department', offShifts);
         if(!offRes) 
             return res.status(httpCodes.OK).send(null);
-        finalArrayResult.push(offRes);
+        finalArrayResultdep.push(offRes);
+        console.log('dayoff'); 
+        console.log(finalArrayResultdep);
+
         // FOR NOW!!! //
         const submittedShifts = filteredShifts.filter(s => s.submitted === true );
-        // const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`${month}/26/${year}`));
-        // const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`${month}/26/${year}`));
-        const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`11/26/${year}`));    //oren
-        const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`11/26/${year}`));  //oren
+        const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`${month}/26/${year}`));
+        const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`${month}/26/${year}`));
+        //const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`11/26/${year}`));    //oren
+        //const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`11/26/${year}`));  //oren
         if(!inTimeShifts)
             return res.status(httpCodes.OK).send(null);
         const inTimeRes = getStats('department', inTimeShifts);
@@ -150,9 +156,11 @@ async function departmentStats(req, res, next) {
             minID: notInTimeRes.maxID,
             minCount: notInTimeRes.maxCount
         };
-        console.log(timeRes);
-        finalArrayResult.push(timeRes);
-        return res.status(httpCodes.OK).send(finalArrayResult);
+        finalArrayResultdep.push(timeRes);
+        console.log('inTime'); 
+        console.log(finalArrayResultdep);
+ 
+        return res.status(httpCodes.OK).send(finalArrayResultdep);
     } catch (error) {
         next(error);
     }
