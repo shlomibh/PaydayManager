@@ -88,7 +88,8 @@ async function getUserById(res, req, next, id) {
 
 async function getUserDetailsById(res, req, next) {
     try {
-        const id = req.params.id;
+        console.log(req.body);
+        const id = req.body.user;
         console.log(id);
 
         const user = await User.findOne({ _id: id }); // בודק את תעודת זהות המתקבלת ומחפש אותה
@@ -103,13 +104,20 @@ async function getUserDetailsById(res, req, next) {
 
 async function updateUser(res, req, next) {
     try {
-        const user = req.body.user;
+        const user = req.body.employee;
         console.log(user);
 
-        const userFromDb = await User.findOneAndUpdate({ _id: user.id }); // בודק את תעודת זהות המתקבלת ומחפש אותה
+        const userFromDb = await User.findOne({ _id: user.id }); // בודק את תעודת זהות המתקבלת ומחפש אותה
         if (!userFromDb) {  //אם המשתמש לא קיים מחזיר הודעה בהתאם
             return res.status(httpCodes.FORBIDDEN);
         }
+        userFromDb.phoneNumber = user.phoneNumber;
+        userFromDb.role = user.role;
+        userFromDb.department = user.department;
+
+        console.log(userFromDb);
+
+        userFromDb.save();
         return res.status(httpCodes.OK).send(userFromDb);
     } catch (error) {
         next(error);
