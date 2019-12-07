@@ -85,11 +85,45 @@ async function getUserById(res, req, next, id) {
         next(error);
     }
 }
+
+async function getUserDetailsById(res, req, next) {
+    try {
+        const id = req.params.id;
+        console.log(id);
+
+        const user = await User.findOne({ _id: id }); // בודק את תעודת זהות המתקבלת ומחפש אותה
+        if (!user) {  //אם המשתמש לא קיים מחזיר הודעה בהתאם
+            return null;
+        }
+        return res.status(httpCodes.OK).send(user);
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function updateUser(res, req, next) {
+    try {
+        const user = req.body.user;
+        console.log(user);
+
+        const userFromDb = await User.findOneAndUpdate({ _id: user.id }); // בודק את תעודת זהות המתקבלת ומחפש אותה
+        if (!userFromDb) {  //אם המשתמש לא קיים מחזיר הודעה בהתאם
+            return res.status(httpCodes.FORBIDDEN);
+        }
+        return res.status(httpCodes.OK).send(userFromDb);
+    } catch (error) {
+        next(error);
+    }
+}
+
+
 //הכרזה וייצוא של הפונקציות
 const usersControllers = {
     login,
     register,
     getUsersDepartment,
-    getUserById
+    getUserById,
+    getUserDetailsById,
+    updateUser
 };
 module.exports = usersControllers;

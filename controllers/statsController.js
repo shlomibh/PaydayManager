@@ -62,10 +62,10 @@ async function lectorStats(req, res, next) {
 
     // FOR NOW!!! //
     const submittedShifts = filteredShifts.filter(s => s.submitted === true );
-    const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`${month}/26/${year}`));
-    const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`${month}/26/${year}`));
-    // const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`11/26/${year}`));    //oren
-    // const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`11/26/${year}`));  //oren
+    // const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`${month}/26/${year}`));
+    // const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`${month}/26/${year}`));
+    const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`11/26/${year}`));    //oren
+    const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`11/26/${year}`));  //oren
     if(!inTimeShifts)
         return res.status(httpCodes.OK).send(null);
     const inTimeRes = getStats('lector', inTimeShifts);
@@ -132,10 +132,10 @@ async function departmentStats(req, res, next) {
         finalArrayResult.push(offRes);
         // FOR NOW!!! //
         const submittedShifts = filteredShifts.filter(s => s.submitted === true );
-        const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`${month}/26/${year}`));
-        const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`${month}/26/${year}`));
-        // const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`11/26/${year}`));    //oren
-        // const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`11/26/${year}`));  //oren
+        // const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`${month}/26/${year}`));
+        // const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`${month}/26/${year}`));
+        const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`11/26/${year}`));    //oren
+        const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`11/26/${year}`));  //oren
         if(!inTimeShifts)
             return res.status(httpCodes.OK).send(null);
         const inTimeRes = getStats('department', inTimeShifts);
@@ -236,6 +236,6 @@ function getStats(identify, shifts) {
 
 const statsControllers = {
     lectorStats,
-    departmentStats
+    departmentStats,
 };
 module.exports = statsControllers
