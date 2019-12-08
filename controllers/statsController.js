@@ -2,17 +2,18 @@ const httpCodes = require('http-status-codes');
 const User = require('../models/Users');
 const Shift = require('../models/Shifts');
 const userController = require('./UsersController');
-
+// .הפונקציה המטפלת בניתוח סטטיסטי של המרצים. הפונקציה מכניסה למערך את כל המשמרות שהם ״אושרו״ ע״י ראש המחלקה ןלפי החודש והשנה אותה בחר המשתמש
+//לאחר מכן הפונקציה מסננת את המשמרות שהופיע בהם ״ביטול״
 async function lectorStats(req, res, next) {
     try {
         const month = req.params.month; // החודש אותו ביקש המשתמש לקבל
         const year = req.params.year; //השנה אותה ביקש המשתמש לבקש
         const finalArrayResult = [];
-        const shifts = await Shift.find({ submitted: true });
+        const shifts = await Shift.find({ submitted: true }); //כל הדיווחים שאושרו ע״י ראש המחלקה
         if (!shifts) return res.status(httpCodes.FORBIDDEN).send("there is no shifts"); // אם אין משמרות מחזיר הודעת שגיאה
-        const filteredShifts = getFilteredShifts(shifts, month, year);
+        const filteredShifts = getFilteredShifts(shifts, month, year); // מערך שבו נמצאים משמרות שאושרו ע״י ראש המחלקה,חודש ושנה שנבחרו
 
-        const canceledShifts = filteredShifts.filter(s => s.absent === 'ביטול');
+        const canceledShifts = filteredShifts.filter(s => s.absent === 'ביטול'); // משמרות שהופיע בהם ביטול
         if(!canceledShifts) 
             return res.status(httpCodes.OK).send(null);
         const canceledRes = getStats('lector', canceledShifts);

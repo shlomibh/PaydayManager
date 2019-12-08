@@ -26,5 +26,5 @@ passport.use(  // מבקשים להשתמש ב״פספורט״ באמצעות ה
     }
   )
 );
-const LoginRequired = passport.authenticate ('jwt',{session:false}); 
+const LoginRequired = passport.authenticate ('jwt',{session:false}); // 
 module.exports = LoginRequired;
