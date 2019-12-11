@@ -25,20 +25,22 @@ const Shift = require('../models/Shifts');
 //     }
 // }
 
+
+//     דיווח על משמרת חדשה
 async function postShift(req, res, next) {
     try {
         const shift = req.body.shift;
-        const id = shift.employeeId;
-        let ans;
-        const user = await User.findOne({
+        const id = shift.employeeId; //תעודת זהות של המשתמש
+        let ans; // משתנה שיקבל אמת או שקר מהפונקציה שתבדוק את תקינות השעות שמילא המשתמש
+        const user = await User.findOne({  //מציאת המשתמש וכל פרטיו לפי תעודת זהות השלו
             _id: id
         });
-        if (!user) return res.status(httpCodes.CONFLICT).send("there is no such user");
-        const department = user.department;
+        if (!user) return res.status(httpCodes.CONFLICT).send("there is no such user"); // אם לא קיים משתמש כזה מחזיר הודעה בהתאםה
+        const department = user.department; //   shift המחלקה אליה שייך המשתמש והצבתו באובייקט     
         shift.department = department;
-        existedShift = await Shift.find({ employeeId: shift.employeeId, date: shift.date });
-        if(existedShift.length > 0){
-            if(shift.absent === "חופש" || shift.absent === "מחלה") { //if we want to add absent shift
+        existedShift = await Shift.find({ employeeId: shift.employeeId, date: shift.date }); //מחפש את המשמרת לפי תעודת זהות המשתמש והתאריך אותו בחר
+        if(existedShift.length > 0){ //בדיקה שאכן קיימת לפחות משמרת
+            if(shift.absent === "חופש" || shift.absent === "מחלה") { // אם המשתמש בחר בהיעדרות מחלה או חופש 
                 existedShift.forEach(element => {
                     if(element) return res.status(httpCodes.FORBIDDEN).send("there is shifts in this date");
                 });
@@ -72,12 +74,12 @@ async function postShift(req, res, next) {
     }
 }
 
-//קבלת משמרות
+//         קבלת משמרות (הקיימות כבר בשרת
 async function getShifts(req, res, next) {
     try {
         const employeeId = req.params.id; //תעודת זהות של המשתמש 
-        const shifts = await Shift.find({
-            employeeId: employeeId  //המשמרת של אותו משתמש לפי הת״ז שלו
+        const shifts = await Shift.find({  // מציאת כל המשמרות לפי התעודת זהות של המשתמש
+            employeeId: employeeId   
         });
         if (!shifts) return res.status(httpCodes.FORBIDDEN).send("there is no shifts to that employee"); // אם אין משמרות מחזיר הודעה בהתאם
         console.log(shifts);
@@ -103,37 +105,37 @@ async function getShifts(req, res, next) {
             next(error);
         }
     }
-
+// פונקציה שבודקת אם המשתמש -המרצה-אישר את כל המשמרות ושומרת את התאריך שאישר
     async function submitAll(req, res, next) {
         try {
-           const employeeId = req.body.employeeId; // משמרת המשתמש 
-           const {month , year} = req.body.date;
+           const employeeId = req.body.employeeId; //תעודת זהות של המשתמש
+           const {month , year} = req.body.date; // תאריך אותו בחר המשתמש
            const user = await User.findOne({  //מציאת המשתמש לפי מספר הזדהות שלו
                 _id: employeeId
            });
-            if (!user) return res.status(httpCodes.CONFLICT).send("there is no such user"); // בודק אם קיים משתמש כזה לפי תעודת זהות שלו
-            const role = user.role;
-           const shifts = await Shift.find({ employeeId: employeeId });
-           if(!shifts) return res.status(httpCodes.CONFLICT).send("no shifts");
-           const filterredShiftsbyMonth = shifts.filter( s => s.date.split('/')[0] === `${month}`);
+            if (!user) return res.status(httpCodes.CONFLICT).send("there is no such user"); // אם אין משתמש כזה מחזיר הודעה התאם
+            const role = user.role; //תפקיד המשתמש-מרצה או ראש מחלקה או מנהל שכר
+           const shifts = await Shift.find({ employeeId: employeeId }); //מציאת כל המשמרות לפי תיודת זהות המשתמש
+           if(!shifts) return res.status(httpCodes.CONFLICT).send("no shifts"); // אם לא קיים מוציא הודעה בהתאם
+           const filterredShiftsbyMonth = shifts.filter( s => s.date.split('/')[0] === `${month}`); //סינון לכל המשמרות אותם בחר המשתמש לפי חודש ושנה
            const filterredShifts = filterredShiftsbyMonth.filter( s => s.date.split('/')[2] === `${year}`);
            filterredShifts.forEach(element => {
-               if(element.lectorSubmitted === false){
+               if(element.lectorSubmitted === false){  // משתנה בוליאני שבודק אם המרצה אישר את המשמרות שלו
                 if(role === 'lector'){
-                    element.lectorSubmitted = true;
-                    element.dateLectorSubmit = new Date().toLocaleDateString();
+                    element.lectorSubmitted = true; // בודק אם תפקיד המשתמש הנוכחי הוא מרצה אם כן המשתנה הבוליאני הופך לאמת
+                    element.dateLectorSubmit = new Date().toLocaleDateString(); // התאריך אותו אישר המרצה את המשמרות שלו לפי התאריך הנוכחי שבמחשב
                 }
-                else{
+                else{                                  // מצב שבו המשתנה הבוליאני אמת
                         element.lectorSubmitted = true;
-                        if(element.dateLectorSubmit === '')
-                            element.dateLectorSubmit = new Date().toLocaleDateString();
-                        element.submitted = true;
-                        element.save();
+                        if(element.dateLectorSubmit === '') // אם התאריך של אישור הדיווחים של המרצה ריק
+                            element.dateLectorSubmit = new Date().toLocaleDateString(); // מכניס את התאריך הנוכחי
+                        element.submitted = true; //המשמרות אושר
+                        element.save(); //שמירה
                 }
             }
                 
            });
-            return res.status(httpCodes.OK).send(true); // אם הכל תקין מחזיר את הדיווח של המשמרת
+            return res.status(httpCodes.OK).send(true); // מחזיר הודעה שהכל תקין
         } catch (error) {
             next(error);
         }
@@ -156,11 +158,11 @@ async function deleteShift(req, res, next) {
         next(error);
     }
 }
-
+//בדיקת תקינות הזנת השעות
 function checkHourValidation(res, element, shift) {
-    const startFromDb = element.start;
-    const endFromDb = element.end;
-    if(!checkHours(startFromDb, shift.start)) {
+    const startFromDb = element.start; // תחילת שעת העבודה ששלח המשתמש
+    const endFromDb = element.end; //סיום שעת העבודה ששלח המשתמש
+    if(!checkHours(startFromDb, shift.start)) { 
         return false;
     }
     else if(!checkHours(endFromDb, shift.end)){
@@ -171,20 +173,20 @@ function checkHourValidation(res, element, shift) {
     }
     return true;
 }
-
+// פונקציה שבודקת אם השעות שהוזנו חוקים
 function checkHours(existed, toAdd) {
-    const splitedExisted = existed.split(':');
-    const splitedToAdd = toAdd.split(':');
-    if(+splitedExisted[0] > +splitedToAdd[0]){
+    const splitedExisted = existed.split(':'); //        שעת התחלה-שימוש בפונקציה שתחלק לנו את שעת ההתחלה לשעות ודקות
+    const splitedToAdd = toAdd.split(':');//שעת סוף-שימוש בפונקציה שתחלק לנו את השעה לפי שעות ודקות
+    if(+splitedExisted[0] > +splitedToAdd[0]){ //בודק את שעת ההתחלה-אם השעה יותר גדולה משעת הסוף-דבר שאינו הגיוני ולכם מחזיר שקר
       return false;
     }
-    else if(+splitedExisted[0] === +splitedToAdd[0] && +splitedExisted[1] > +splitedToAdd[1]){
+    else if(+splitedExisted[0] === +splitedToAdd[0] && +splitedExisted[1] > +splitedToAdd[1]){ // בודק אם שעת ההתחלה שווה לשעת הסוף אבל אם הדקות בשעת ההתחלה יותר גדולות מדקות של שעת הסיום הדבר אינו הגיוני ולכן מחזיר שקר
         return false;
       }
-    else if(+splitedExisted[0] === +splitedToAdd[0] && +splitedExisted[1] === +splitedToAdd[1]){
+    else if(+splitedExisted[0] === +splitedToAdd[0] && +splitedExisted[1] === +splitedToAdd[1]){ // מצב שבו שעת ההתחלה וגם הדקות שוות לשעת הסוף וגם לדקות-דבר אינו הגיוני ולכן מחזיר שקר
         return false;
     }
-    return true;
+    return true; // אם מצבים אלו לא קרו מחזיר אמת
   }
 
 

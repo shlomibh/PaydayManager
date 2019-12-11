@@ -83,13 +83,13 @@ UserSchema.methods.validPassword = function(password) {
 //  נירצה לחדש אותה אחת לכמה זמן jwtל token לאחר שיצרנו    
 //פונקציה זו מקבלת את התאריך הנוכחי של יצירת הסיסמא ומוסיפה לו עוד 60-ימים-ואחרי זה סיסמא זו תפוג
 UserSchema.methods.generateJWT = function() {
-  const today = new Date();
+  const today = new Date(); //התאריך שנוצר החתימה
   const exp = new Date(today);
-  exp.setDate(today.getDate() + 60);
+  exp.setDate(today.getDate() + 60); //פג תוקף של החתימה-אחרי 60 יום מיום היווצרה
 // החתימה תהיה בנויה מהדברים הבאים
   return jwt.sign(
     {
-      iss:'PayDayManager',// who do it
+      iss:'PayDayManager',// יוצר החתימה
       id: this._id,
       username: this.username,
       exp: parseInt(exp.getTime() / 1000) // הזמן שנוצר החתימה

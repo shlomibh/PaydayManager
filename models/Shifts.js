@@ -24,13 +24,13 @@ const ShiftSchema = new Schema({
     absent: {  //היעדרות
         type: String
     },
-    submitted: {
+    submitted: {  // אישור משמרות ראש מחלקה של המרצה תחתיו
         type: Boolean
     },
-    lectorSubmitted: {
+    lectorSubmitted: {  // אם המרצה אישר את המשמרות שלו
         type: Boolean
     },
-    dateLectorSubmit: {
+    dateLectorSubmit: { // תאריך אישור המשמרות של אותו חודש של המרצה
         type: String
     }
 });
