@@ -1,30 +1,6 @@
 const httpCodes = require('http-status-codes');
 const User = require('../models/Users');
 const Shift = require('../models/Shifts');
-// דיווח על משמרת
-// async function postShift(req, res, next) {
-//     try {
-//         const shift = req.body.shift; // משמרת המשתמש
-//         const id = shift.employeeId; //תעודת זהות של המשתמש שדיווח משמרת
-//         const user = await User.findOne({  //מציאת המשתמש לפי תעודת הזהות שלו
-//             _id: id
-//         });
-//         if (!user) return res.status(httpCodes.CONFLICT).send("there is no such user"); // בודק אם קיים משתמש כזה לפי תעודת זהות שלו
-//         const department = user.department; //מחלקה אליה שייך המשתמש
-//         shift.department = department; //המחלקה של אותו דיווח
-//         shift.submitted = false; // דווח של ראש מחלקה על מרצה שדיווח בזמן
-//         shift.lectorSubmitted = false;
-//         shift.dateLectorSubmit= '';
-//         console.log(shift);
-//         const shiftFromDb = await Shift.create(shift); //משמרות הקיימות-מבסיס הנתונים
-//         if (!shiftFromDb) return res.status(httpCodes.FORBIDDEN).send("cannot create this shift"); //אם המשמרת לא קיימת בבסיס הנתונים מוציא הודעה בהתאם
-//         console.log(shiftFromDb);
-//         return res.status(httpCodes.OK).send(shiftFromDb); // אם הכל תקין מחזיר את הדיווח של המשמרת
-//     } catch (error) {
-//         next(error);
-//     }
-// }
-
 
 //     דיווח על משמרת חדשה
 async function postShift(req, res, next) {

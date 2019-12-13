@@ -84,10 +84,8 @@ async function getUsersDepartment(req, res, next) {
 }
 
 
-async function getUserDetailsById(res, req, next) {
+async function getUserDetailsById(req, res, next) {
     try {
-        console.log(req);
-        console.log(req.params);
         const id = req.params.id;
         console.log(id);
 
@@ -103,7 +101,7 @@ async function getUserDetailsById(res, req, next) {
     }
 }
 
-async function updateUser(res, req, next) {
+async function updateUser(req, res, next) {
     try {
         const user = req.body.employee;
         console.log(user);
@@ -127,17 +125,14 @@ async function updateUser(res, req, next) {
 }
 
 
-async function getUserById(res, req, next, id) {
+async function getLectors(req, res, next) {
     try {
-        console.log(id);
-
-        const user = await User.findOne({
-            _id: id
-        }); // בודק את תעודת זהות המתקבלת ומחפש אותה
-        if (!user) { //אם המשתמש לא קיים מחזיר הודעה בהתאם
+        const users = await User.find(); // בודק את תעודת זהות המתקבלת ומחפש אותה
+        if (!users) { //אם המשתמש לא קיים מחזיר הודעה בהתאם
             return null;
         }
-        return user;
+        const lectors = users.filter( s => s.role === 'lector');
+        return lectors;
     } catch (error) {
         next(error);
     }
@@ -149,8 +144,8 @@ const usersControllers = {
     login,
     register,
     getUsersDepartment,
-    getUserById,
     getUserDetailsById,
-    updateUser
+    updateUser,
+    getLectors
 };
 module.exports = usersControllers;

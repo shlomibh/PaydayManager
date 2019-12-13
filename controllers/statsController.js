@@ -2,6 +2,8 @@ const httpCodes = require('http-status-codes');
 const User = require('../models/Users');
 const Shift = require('../models/Shifts');
 const userController = require('./UsersController');
+const shiftsController = require('./shiftsController');
+
 // .הפונקציה המטפלת בניתוח סטטיסטי של המרצים. הפונקציה מכניסה למערך את כל המשמרות שהם ״אושרו״ ע״י ראש המחלקה ןלפי החודש והשנה אותה בחר המשתמש
 //לאחר מכן הפונקציה מסננת את המשמרות שהופיע בהם ״ביטול״
 async function lectorStats(req, res, next) {
@@ -179,9 +181,9 @@ function getFilteredShifts(shifts, month, year) {
 }
 
 function getStats(identify, shifts) {
-    let max=0;
+    let max;
     let maxID;
-    let min=10000;
+    let min;
     let minID;
     const statList = [];
     let dataToPush = {
@@ -221,6 +223,7 @@ function getStats(identify, shifts) {
             }
         }
     });
+    min = max = statList[0].count;
     statList.forEach(statElem => {
         if(statElem.count < min && statElem.id !== maxID) {
             min = statElem.count;
@@ -243,8 +246,70 @@ function getStats(identify, shifts) {
     return res;
 }
 
+async function getShiftsOfLector(lector, dateToSubmit){
+    try{
+        let flag = false;
+        const shifts = await Shift.find({employeeId: lector._id});
+        const filterredShifts = getFilteredShifts(shifts, `${new Date().getMonth()+1}`, `${new Date().getFullYear()}`);
+      //  console.log(filterredShifts);
+        filterredShifts.forEach(element => {
+                    if(element.lectorSubmitted === false || element.lectorSubmitted === undefined) {
+                        flag = true;
+                    }
+                    else if(element.dateLectorSubmit > dateToSubmit || element.dateLectorSubmit === undefined){
+                        flag = true;
+                    }
+                });
+            console.log(flag);
+            return {flag, filterredShifts};
+        }
+        catch(error){
+            console.log(error);
+        }
+}
+
+async function getLectorsStats(req, res, next) {
+    try {
+        const lectors = await userController.getLectors(req,res,next);
+        if(!lectors){
+            return res.status(httpCodes.FORBIDDEN).send("No lectors");
+        }
+        const dateToSubmit = new Date(`${new Date().getMonth()+1}/26/${new Date().getFullYear()}`).toLocaleDateString();
+        console.log(dateToSubmit);
+        const delayedLectorsToSend = [];
+        const goodLectorsToSend =[];
+        lectors.forEach(lector => {
+            const {flag, shifts} = getShiftsOfLector(lector, dateToSubmit);
+            console.log(flag);
+            if (flag === false){
+                goodLectorsToSend.push(lector);
+                console.log(goodLectorsToSend);
+                //console.log('false');
+                //console.log(lector.username);
+            }
+            else if(flag && shifts !== undefined) {
+                delayedLectorsToSend.push(lector);
+                console.log(delayedLectorsToSend); 
+               // console.log('true');
+               // console.log(lector.username);
+            }
+        });
+        const dataToSend = {
+            goodLectors: goodLectorsToSend,
+            delayedLectors: delayedLectorsToSend
+        };
+        console.log(dataToSend);
+        return res.status(httpCodes.OK).send(dataToSend); //מחזיר הודעה שהפעולה הצליחה
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+
 const statsControllers = {
     lectorStats,
     departmentStats,
+    getLectorsStats
 };
 module.exports = statsControllers
