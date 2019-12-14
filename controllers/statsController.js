@@ -11,20 +11,22 @@ async function lectorStats(req, res, next) {
         const month = req.params.month; // החודש אותו ביקש המשתמש לקבל
         const year = req.params.year; //השנה אותה ביקש המשתמש לבקש
         const finalArrayResult = [];
-        const shifts = await Shift.find({ submitted: true }); //כל הדיווחים שאושרו ע״י ראש המחלקה
+        const shifts = await Shift.find({
+            submitted: true
+        }); //כל הדיווחים שאושרו ע״י ראש המחלקה
         if (!shifts) return res.status(httpCodes.FORBIDDEN).send("there is no shifts"); // אם אין משמרות מחזיר הודעת שגיאה
         const filteredShifts = getFilteredShifts(shifts, month, year); // מערך שבו נמצאים משמרות שאושרו ע״י ראש המחלקה,חודש ושנה שנבחרו
 
         const canceledShifts = filteredShifts.filter(s => s.absent === 'ביטול'); // משמרות שהופיע בהם ביטול
-        if(!canceledShifts) 
+        if (!canceledShifts)
             return res.status(httpCodes.OK).send(null);
         const canceledRes = getStats('lector', canceledShifts);
-        if(!canceledRes) 
+        if (!canceledRes)
             return res.status(httpCodes.OK).send(null);
         const cmaxUser = await userController.getUserById(req, res, next, canceledRes.maxID);
         const cminUser = await userController.getUserById(req, res, next, canceledRes.minID);
         const cFinalResult = {
-            maxUser: cmaxUser, 
+            maxUser: cmaxUser,
             maxCount: canceledRes.maxCount,
             minUser: cminUser,
             minCount: canceledRes.minCount
@@ -32,69 +34,69 @@ async function lectorStats(req, res, next) {
         finalArrayResult.push(cFinalResult);
 
         const sickShifts = filteredShifts.filter(s => s.absent === 'מחלה');
-        if(!sickShifts) 
+        if (!sickShifts)
             return res.status(httpCodes.OK).send(null);
         const sickRes = getStats('lector', sickShifts);
-        if(!sickRes) 
+        if (!sickRes)
             return res.status(httpCodes.OK).send(null);
         const smaxUser = await userController.getUserById(req, res, next, sickRes.maxID);
         const sminUser = await userController.getUserById(req, res, next, sickRes.minID);
         const sFinalResult = {
-            maxUser: smaxUser, 
+            maxUser: smaxUser,
             maxCount: sickRes.maxCount,
             minUser: sminUser,
             minCount: sickRes.minCount
         };
         finalArrayResult.push(sFinalResult);
-    
+
         const offShifts = filteredShifts.filter(s => s.absent === 'חופש');
-        if(!offShifts) 
+        if (!offShifts)
             return res.status(httpCodes.OK).send(null);
         const offRes = getStats('lector', offShifts);
-        if(!offRes) 
+        if (!offRes)
             return res.status(httpCodes.OK).send(null);
         const omaxUser = await userController.getUserById(req, res, next, offRes.maxID);
         const ominUser = await userController.getUserById(req, res, next, offRes.minID);
         const oFinalResult = {
-            maxUser: omaxUser, 
+            maxUser: omaxUser,
             maxCount: offRes.maxCount,
             minUser: ominUser,
             minCount: offRes.minCount
         };
         finalArrayResult.push(oFinalResult);
 
-    // FOR NOW!!! //
-    const submittedShifts = filteredShifts.filter(s => s.submitted === true );
-    const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`${month}/26/${year}`));
-    const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`${month}/26/${year}`));
-    //const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`11/26/${year}`));    //oren
-    //const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`11/26/${year}`));  //oren
-    if(!inTimeShifts)
-        return res.status(httpCodes.OK).send(null);
-    const inTimeRes = getStats('lector', inTimeShifts);
-    if(!inTimeRes) 
-        return res.status(httpCodes.OK).send(null);
-    const notInTimeRes = getStats('lector', notInTimeShifts);
-    if(!notInTimeRes) 
-        return res.status(httpCodes.OK).send(null);
-    timeRes = {
-        maxID: inTimeRes.maxID,
-        maxCount: inTimeRes.maxCount,
-        minID: notInTimeRes.maxID,
-        minCount: notInTimeRes.maxCount
-    };
-    const itmaxUser = await userController.getUserById(req, res, next, timeRes.maxID);
-    const itminUser = await userController.getUserById(req, res, next, timeRes.minID);
-    const itFinalResult = {
-        maxUser: itmaxUser, 
-        maxCount: timeRes.maxCount,
-        minUser: itminUser,
-        minCount: timeRes.minCount
-    };
-    console.log(itFinalResult);
-    finalArrayResult.push(itFinalResult);
-    
-    return res.status(httpCodes.OK).send(finalArrayResult);
+        // FOR NOW!!! //
+        const submittedShifts = filteredShifts.filter(s => s.submitted === true);
+        const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`${month}/26/${year}`));
+        const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`${month}/26/${year}`));
+        //const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`11/26/${year}`));    //oren
+        //const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`11/26/${year}`));  //oren
+        if (!inTimeShifts)
+            return res.status(httpCodes.OK).send(null);
+        const inTimeRes = getStats('lector', inTimeShifts);
+        if (!inTimeRes)
+            return res.status(httpCodes.OK).send(null);
+        const notInTimeRes = getStats('lector', notInTimeShifts);
+        if (!notInTimeRes)
+            return res.status(httpCodes.OK).send(null);
+        timeRes = {
+            maxID: inTimeRes.maxID,
+            maxCount: inTimeRes.maxCount,
+            minID: notInTimeRes.maxID,
+            minCount: notInTimeRes.maxCount
+        };
+        const itmaxUser = await userController.getUserById(req, res, next, timeRes.maxID);
+        const itminUser = await userController.getUserById(req, res, next, timeRes.minID);
+        const itFinalResult = {
+            maxUser: itmaxUser,
+            maxCount: timeRes.maxCount,
+            minUser: itminUser,
+            minCount: timeRes.minCount
+        };
+        console.log(itFinalResult);
+        finalArrayResult.push(itFinalResult);
+
+        return res.status(httpCodes.OK).send(finalArrayResult);
     } catch (error) {
         next(error);
     }
@@ -106,52 +108,54 @@ async function departmentStats(req, res, next) {
         const year = req.params.year; //השנה אותה ביקש המשתמש לבקש
         const finalArrayResultdep = [];
 
-        const shifts = await Shift.find({ submitted: true });
+        const shifts = await Shift.find({
+            submitted: true
+        });
         if (!shifts) return res.status(httpCodes.FORBIDDEN).send("there is no shifts"); // אם אין משמרות מחזיר הודעת שגיאה
         const filteredShifts = getFilteredShifts(shifts, month, year);
-        
+
         const canceledShifts = filteredShifts.filter(s => s.absent === 'ביטול');
-        if(!canceledShifts) 
+        if (!canceledShifts)
             return res.status(httpCodes.OK).send(null);
         const canceledRes = getStats('department', canceledShifts);
         console.log(canceledRes);
-        if(!canceledRes) 
+        if (!canceledRes)
             return res.status(httpCodes.OK).send(null);
         finalArrayResultdep.push(canceledRes);
-        console.log('cancel'); 
+        console.log('cancel');
         console.log(finalArrayResultdep);
         const sickShifts = filteredShifts.filter(s => s.absent === 'מחלה');
-        if(!sickShifts) 
+        if (!sickShifts)
             return res.status(httpCodes.OK).send(null);
         const sickRes = getStats('department', sickShifts);
-        if(!sickRes) 
+        if (!sickRes)
             return res.status(httpCodes.OK).send(null);
         finalArrayResultdep.push(sickRes);
-        console.log('sick'); 
+        console.log('sick');
         console.log(finalArrayResultdep);
         const offShifts = filteredShifts.filter(s => s.absent === 'חופש');
-        if(!offShifts) 
+        if (!offShifts)
             return res.status(httpCodes.OK).send(null);
         const offRes = getStats('department', offShifts);
-        if(!offRes) 
+        if (!offRes)
             return res.status(httpCodes.OK).send(null);
         finalArrayResultdep.push(offRes);
-        console.log('dayoff'); 
+        console.log('dayoff');
         console.log(finalArrayResultdep);
 
         // FOR NOW!!! //
-        const submittedShifts = filteredShifts.filter(s => s.submitted === true );
+        const submittedShifts = filteredShifts.filter(s => s.submitted === true);
         const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`${month}/26/${year}`));
         const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`${month}/26/${year}`));
         //const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`11/26/${year}`));    //oren
         //const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`11/26/${year}`));  //oren
-        if(!inTimeShifts)
+        if (!inTimeShifts)
             return res.status(httpCodes.OK).send(null);
         const inTimeRes = getStats('department', inTimeShifts);
-        if(!inTimeRes) 
+        if (!inTimeRes)
             return res.status(httpCodes.OK).send(null);
         const notInTimeRes = getStats('department', notInTimeShifts);
-        if(!notInTimeRes) 
+        if (!notInTimeRes)
             return res.status(httpCodes.OK).send(null);
         timeRes = {
             maxID: inTimeRes.maxID,
@@ -160,9 +164,9 @@ async function departmentStats(req, res, next) {
             minCount: notInTimeRes.maxCount
         };
         finalArrayResultdep.push(timeRes);
-        console.log('inTime'); 
+        console.log('inTime');
         console.log(finalArrayResultdep);
- 
+
         return res.status(httpCodes.OK).send(finalArrayResultdep);
     } catch (error) {
         next(error);
@@ -170,12 +174,12 @@ async function departmentStats(req, res, next) {
 }
 
 function getFilteredShifts(shifts, month, year) {
-   // month='11'; //need to remove!!!!
+    // month='11'; //need to remove!!!!
     const filterredShifts = shifts.filter(s => s.date.split('/')[0] === month); /// ״מסנן משמרות לפי חודש :הפונקציה לוקחת את התאריך שהתקבל ומפרקת אותה למערך לפי התו ומחזירה את הערך שבמקום הראשון    Shlomi: [0]
-    if(!filterredShifts) 
+    if (!filterredShifts)
         return res.status(httpCodes.FORBIDDEN).send("no shifts");
     const dateFillteredShifts = filterredShifts.filter(s => s.date.split('/')[2] === year);
-    if(!dateFillteredShifts) 
+    if (!dateFillteredShifts)
         return res.status(httpCodes.FORBIDDEN).send("no shifts");
     return dateFillteredShifts;
 }
@@ -191,115 +195,159 @@ function getStats(identify, shifts) {
         count: Number
     };
     shifts.forEach(element => {
-        if(statList.length === 0){
-            if(identify === 'lector')
-                dataToPush = {id: element.employeeId, count: 1};
-            else if(identify === 'department')
-                dataToPush = {id: element.department, count: 1};
+        if (statList.length === 0) {
+            if (identify === 'lector')
+                dataToPush = {
+                    id: element.employeeId,
+                    count: 1
+                };
+            else if (identify === 'department')
+                dataToPush = {
+                    id: element.department,
+                    count: 1
+                };
             statList.push(dataToPush);
-        }
-        else {
+        } else {
             let flag = false;
             statList.forEach(statElem => {
-                if(identify === 'lector') {
-                        if(statElem.id === element.employeeId){
+                if (identify === 'lector') {
+                    if (statElem.id === element.employeeId) {
                         flag = true;
-                        statElem.count ++;
+                        statElem.count++;
                     }
-                }
-                else if(identify === 'department') {
-                    if(statElem.id === element.department){
+                } else if (identify === 'department') {
+                    if (statElem.id === element.department) {
                         flag = true;
-                        statElem.count ++;
+                        statElem.count++;
                     }
                 }
             });
-            if(flag === false){
-                if(identify === 'lector')
-                    dataToPush = {id: element.employeeId, count: 1};
-                else if(identify === 'department')
-                    dataToPush = {id: element.department, count: 1};
+            if (flag === false) {
+                if (identify === 'lector')
+                    dataToPush = {
+                        id: element.employeeId,
+                        count: 1
+                    };
+                else if (identify === 'department')
+                    dataToPush = {
+                        id: element.department,
+                        count: 1
+                    };
                 statList.push(dataToPush);
             }
         }
     });
+    console.log(statList[0]);
     min = max = statList[0].count;
     statList.forEach(statElem => {
-        if(statElem.count < min && statElem.id !== maxID) {
+        if (statElem.count < min && statElem.id !== maxID) {
             min = statElem.count;
             minID = statElem.id;
         }
-        if(statElem.count > max) {
+        if (statElem.count > max) {
             max = statElem.count;
             maxID = statElem.id;
         }
     });
-    if(minID === undefined){
+    if (minID === undefined) {
         minID = maxID;
         min = max;
-    }
-    else if(maxID === undefined){
+    } else if (maxID === undefined) {
         maxID = minID;
         max = min;
     }
-    const res = {maxID: maxID, maxCount: max, minID: minID, minCount: min};
+    const res = {
+        maxID: maxID,
+        maxCount: max,
+        minID: minID,
+        minCount: min
+    };
     return res;
 }
 
-async function getShiftsOfLector(lector, dateToSubmit){
-    try{
-        let flag = false;
-        const shifts = await Shift.find({employeeId: lector._id});
-        const filterredShifts = getFilteredShifts(shifts, `${new Date().getMonth()+1}`, `${new Date().getFullYear()}`);
-      //  console.log(filterredShifts);
-        filterredShifts.forEach(element => {
-                    if(element.lectorSubmitted === false || element.lectorSubmitted === undefined) {
-                        flag = true;
-                    }
-                    else if(element.dateLectorSubmit > dateToSubmit || element.dateLectorSubmit === undefined){
-                        flag = true;
-                    }
-                });
-            console.log(flag);
-            return {flag, filterredShifts};
+function checkIfLectorExistedInList(list, lectorId) {
+    let flag = false;
+    list.forEach(lec => {
+        if (lec === lectorId) {
+            flag = true;
         }
-        catch(error){
-            console.log(error);
+    });
+    return flag;
+}
+
+function findLec(lecList, lecId){
+    let lector;
+    lecList.forEach(lec => {
+        if(`${lec._id}` === lecId){
+            lector = lec;
         }
+    });
+    return lector;
 }
 
 async function getLectorsStats(req, res, next) {
     try {
-        const lectors = await userController.getLectors(req,res,next);
-        if(!lectors){
-            return res.status(httpCodes.FORBIDDEN).send("No lectors");
+        const lectors = [];
+        const inTimeSubmitted = [];
+        const delayedSubmitted = [];
+
+        const shifts = await Shift.find();
+        if (!shifts) {
+            return res.status(httpCodes.FORBIDDEN).send("no shifts");
         }
+        const fShifts = getFilteredShifts(shifts, `${new Date().getMonth()+1}`, `${new Date().getFullYear()}`);
+        console.log(fShifts);
+
         const dateToSubmit = new Date(`${new Date().getMonth()+1}/26/${new Date().getFullYear()}`).toLocaleDateString();
-        console.log(dateToSubmit);
-        const delayedLectorsToSend = [];
-        const goodLectorsToSend =[];
-        lectors.forEach(lector => {
-            const {flag, shifts} = getShiftsOfLector(lector, dateToSubmit);
-            console.log(flag);
-            if (flag === false){
-                goodLectorsToSend.push(lector);
-                console.log(goodLectorsToSend);
-                //console.log('false');
-                //console.log(lector.username);
+        fShifts.forEach(element => {
+            if (!checkIfLectorExistedInList(lectors, element.employeeId)) {
+                console.log('pushed to lectors');
+                lectors.push(element.employeeId);
             }
-            else if(flag && shifts !== undefined) {
-                delayedLectorsToSend.push(lector);
-                console.log(delayedLectorsToSend); 
-               // console.log('true');
-               // console.log(lector.username);
+            if (element.lectorSubmitted === undefined || element.lectorSubmitted === false) {
+                if (!checkIfLectorExistedInList(delayedSubmitted, element.employeeId)) {
+                    console.log('pushed to delayed , submitted false');
+                    delayedSubmitted.push(element.employeeId);
+                }
+            } else if (element.lectorSubmitted === true) {
+                if (element.dateLectorSubmit <= dateToSubmit) {
+                    if (!checkIfLectorExistedInList(inTimeSubmitted, element.employeeId)) {
+                        console.log('pushed to in time');
+                        inTimeSubmitted.push(element.employeeId);
+                    }
+                } else {
+                    if (!checkIfLectorExistedInList(delayedSubmitted, element.employeeId)) {
+                        console.log('pushed to delayed, over time');
+                        delayedSubmitted.push(element.employeeId);
+                    }
+                }
+            }
+        });
+        const lectorsList = await userController.getLectors(req, res, next);
+        if (!lectorsList) {
+            return res.status(httpCodes.CONFLICT).send("no lectors");
+        }
+
+        const updatedInTime = [];
+        inTimeSubmitted.forEach(element => {
+            let fullLec = findLec(lectorsList, element);
+            if(fullLec !== undefined){
+                updatedInTime.push(fullLec);
+            }
+        });
+
+        const updatedDelayed = [];
+        delayedSubmitted.forEach(element => {
+            let fullLec = findLec(lectorsList, element);
+            if(fullLec !== undefined){
+                updatedDelayed.push(fullLec);
             }
         });
         const dataToSend = {
-            goodLectors: goodLectorsToSend,
-            delayedLectors: delayedLectorsToSend
-        };
-        console.log(dataToSend);
-        return res.status(httpCodes.OK).send(dataToSend); //מחזיר הודעה שהפעולה הצליחה
+            inTime: updatedInTime,
+            delayed: updatedDelayed
+        }
+        return res.status(httpCodes.OK).send(dataToSend);
     } catch (error) {
         next(error);
     }
