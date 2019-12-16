@@ -183,7 +183,7 @@ function getFilteredShifts(shifts, month, year) {
         return res.status(httpCodes.FORBIDDEN).send("no shifts");
     return dateFillteredShifts;
 }
-
+//פונקציה שמק
 function getStats(identify, shifts) {
     let max;
     let maxID;

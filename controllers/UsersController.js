@@ -31,28 +31,28 @@ async function login(req, res, next) {
         next(error);
     }
 }
-
+//כנישלחת בקשה לשרת להוספת משתמש חדש השרת בודק אם קיים אימייל שכבר קיים 
 async function register(req, res, next) {
     try {
-        const employee = req.body.employee;
-        const user = await User.findOne({
+        const employee = req.body.employee; //ה״עובד החדש״ שנישלח לשרת
+        const user = await User.findOne({ // בודק את האימייל שרשם המשתמש החדש
             email: employee.email
-        }); //מחפש אלמנט אחד-דוא״ל של המשתמש
-        // בודק האם הדוא״ל של המשתמש או הסיסמא שרשם תקינים
-        if (user) {
-            return res.status(httpCodes.CONFLICT).send("user already existed"); // אם לא-מחזיר הודעה בהתאם
+        }); 
+        
+        if (user) { // אם קיים אימייל כזה מוציא הודעה בהתאם
+            return res.status(httpCodes.CONFLICT).send("user already existed"); // 
         } else {
-            const employeeFromDb = await User.create(employee);
-            if (!employeeFromDb) {
+            const employeeFromDb = await User.create(employee); // אחרת יוצא ״עובד חדש״ ומכניס אותו לבסיס הנתונים
+            if (!employeeFromDb) { // במידה והית קיימת בעיה להכניס אותו לבסיס הנתונים מוציא הודעה בהתאם
                 return res.status(httpCodes.CONFLICT).send("cannot insert employee");
             }
-            employeeFromDb.setPassword(employee.password);
+            employeeFromDb.setPassword(employee.password); // לסיסמא שרשם המשתמש החדש  jwt יצירת
             employeeFromDb.generateJWT();
             employeeFromDb.save();
-            // מחזיר הודעה בהתאם שההתחברות תקינה
-            return res.status(httpCodes.OK).send(employeeFromDb);
+           
+            return res.status(httpCodes.OK).send(employeeFromDb); // מחזיר הודעת תקינות
         }
-    } catch (error) { // מחזיר הודעת שגיאה במידה ויש בעיה אחרת
+    } catch (error) { //מחזיר הודעת שגיאה
         next(error);
     }
 }
