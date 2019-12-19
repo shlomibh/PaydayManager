@@ -2,7 +2,7 @@ const httpCodes = require('http-status-codes');
 const User = require('../models/Users');
 const jwt = require('jsonwebtoken');
 
-// בדיקת התחברות המתמש באמצעות דוא״ל וסיסמא
+// בדיקת התחברות המשתמש באמצעות דוא״ל וסיסמא
 async function login(req, res, next) {
     try {
         const {
@@ -83,35 +83,35 @@ async function getUsersDepartment(req, res, next) {
     }
 }
 
-
+// פונקציה שמחזירה את פרטי המשתמש באמצעות תעודת זהות
 async function getUserDetailsById(req, res, next) {
     try {
-        const id = req.params.id;
+        const id = req.params.id;// תעודת זהות המשתמש הנוכחי
         console.log(id);
 
-        const user = await User.findOne({
+        const user = await User.findOne({ //בודק אם קיים משתמש לפי התעודת הזהות שנמצאה
             _id: id
-        }); // בודק את תעודת זהות המתקבלת ומחפש אותה
-        if (!user) { //אם המשתמש לא קיים מחזיר הודעה בהתאם
+        }); // 
+        if (!user) {  // אם לא קיים משתמש כזה מחזיר ״ריק״
             return null;
         }
-        return res.status(httpCodes.OK).send(user);
+        return res.status(httpCodes.OK).send(user); //אחרת מחזיר את המשתמש במידה ונימצא
     } catch (error) {
         next(error);
     }
 }
-
+//עדכון פרטי המשתמש הנוכחי-ניתן לעדכן רק מספר טלפון,תפקיד או מחלקה 
 async function updateUser(req, res, next) {
     try {
-        const user = req.body.employee;
+        const user = req.body.employee; //המשתמש הנוכחי הנמצא 
         console.log(user);
 
-        const userFromDb = await User.findOne({
+        const userFromDb = await User.findOne({  //מציאת משתמש קיים לפי תעודת הזהות של המשתמש הנוכחי
             _id: user.id
-        }); // בודק את תעודת זהות המתקבלת ומחפש אותה
-        if (!userFromDb) { //אם המשתמש לא קיים מחזיר הודעה בהתאם
+        }); 
+        if (!userFromDb) { //אם לא קיים מספר תעודת זהות כזו מחזיר הודעה שגיאה
             return res.status(httpCodes.FORBIDDEN);
-        }
+        }// עדכון הפרטים שניבחרו לצורך שינוי ע״י המשתמש ושמירתם והחזרת הודעת תקינות
         userFromDb.phoneNumber = user.phoneNumber;
         userFromDb.role = user.role;
         userFromDb.department = user.department;
@@ -124,14 +124,14 @@ async function updateUser(req, res, next) {
     }
 }
 
-
+// פונקציה שמחזירה רק משתמשים שהם מרצים
 async function getLectors(req, res, next) {
     try {
-        const users = await User.find(); // בודק את תעודת זהות המתקבלת ומחפש אותה
-        if (!users) { //אם המשתמש לא קיים מחזיר הודעה בהתאם
+        const users = await User.find(); // חיפוש משתמשים בכללי
+        if (!users) { // אם לא קיים מחזיר ״ריק״
             return null;
         }
-        const lectors = users.filter( s => s.role === 'lector');
+        const lectors = users.filter( s => s.role === 'lector'); // מסנן משתתמשים שהתפקיד שלהם הוא ״מרצה״ ומחזיר אותם
         return lectors;
     } catch (error) {
         next(error);
