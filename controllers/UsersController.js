@@ -107,7 +107,7 @@ async function updateUser(req, res, next) {
         console.log(user);
 
         const userFromDb = await User.findOne({  //מציאת משתמש קיים לפי תעודת הזהות של המשתמש הנוכחי
-            _id: user.id
+            id: user.id
         }); 
         if (!userFromDb) { //אם לא קיים מספר תעודת זהות כזו מחזיר הודעה שגיאה
             return res.status(httpCodes.FORBIDDEN);

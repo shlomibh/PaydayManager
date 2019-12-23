@@ -97,7 +97,7 @@ UserSchema.methods.generateJWT = function() {
     secret
   );
 };
-
+// json web token
 UserSchema.methods.toAuthJSON = function() {
   return {
     username: this.username,
