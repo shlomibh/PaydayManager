@@ -14,6 +14,9 @@ async function postShift(req, res, next) {
         if (!user) return res.status(httpCodes.CONFLICT).send("there is no such user"); // אם לא קיים משתמש כזה מחזיר הודעה בהתאםה
         const department = user.department; //    המחלקה אליה שייך המשתמש והצבתו באובייקט של המשמרת     
         shift.department = department;
+        shift.lectorSubmitted = false;
+        shift.submitted = false;
+        shift.dateLectorSubmit = '';
         existedShift = await Shift.find({ employeeId: shift.employeeId, date: shift.date }); //מחפש את המשמרות הקיימות לפי המזהה של האובייקט של המשמרת והתאריך שניבחר
         if(existedShift.length > 0){ //בדיקה שאכן קיימת לפחות משמרת
             //טיפול בשתי מקרי קיצון שלא יכולים לקרות-המערכת רצה על כל איברי המערך-המשמרות-אם המשתמש דיווח על משמרת באותו יום ולאחר מכן רוצה לדווח על מחלה או חופש באותו תאריך המערכת תחזיר הודעת שגיאה ותדפיס שקימיים משמרות בתאריך הזה-מרצה לא יכול לדווח שהיה נוכח בעבודה וגם במחלה או בחופש
@@ -101,21 +104,25 @@ async function getShifts(req, res, next) {
            const filterredShifts = filterredShiftsbyMonth.filter( s => s.date.split('/')[2] === `${year}`);
            filterredShifts.forEach(element => {
                if(element.lectorSubmitted === false){  // משתנה בוליאני שבודק אם המרצה אישר את המשמרות שלו
-                if(role === 'lector'){
-                    element.lectorSubmitted = true; // בודק אם תפקיד המשתמש הנוכחי הוא מרצה אם כן המשתנה הבוליאני הופך לאמת
-                    element.dateLectorSubmit = new Date().toLocaleDateString(); // התאריך אותו אישר המרצה את המשמרות שלו לפי התאריך הנוכחי שבמחשב
+                    if(role === 'lector'){
+                        element.lectorSubmitted = true; // בודק אם תפקיד המשתמש הנוכחי הוא מרצה אם כן המשתנה הבוליאני הופך לאמת
+                        element.dateLectorSubmit = new Date().toLocaleDateString(); // התאריך אותו אישר המרצה את המשמרות שלו לפי התאריך הנוכחי שבמחשב
+                    }
+                    else{                                  // מצב שבו המשתנה הבוליאני אמת
+                            element.lectorSubmitted = true;
+                            if(element.dateLectorSubmit === '' || element.dateLectorSubmit === undefined) // אם התאריך של אישור הדיווחים של המרצה ריק
+                                element.dateLectorSubmit = new Date().toLocaleDateString(); // מכניס את התאריך הנוכחי
+                            element.submitted = true; //המשמרות אושר
+                    }
                 }
-                else{                                  // מצב שבו המשתנה הבוליאני אמת
-                        element.lectorSubmitted = true;
-                        if(element.dateLectorSubmit === '') // אם התאריך של אישור הדיווחים של המרצה ריק
-                            element.dateLectorSubmit = new Date().toLocaleDateString(); // מכניס את התאריך הנוכחי
-                        element.submitted = true; //המשמרות אושר
-                        element.save(); //שמירה
+                else{
+                    element.submitted = true;
                 }
-            }
-                
+                element.save(); //שמירה
            });
+
             return res.status(httpCodes.OK).send(true); // מחזיר הודעה שהכל תקין
+            
         } catch (error) {
             next(error);
         }

@@ -153,13 +153,25 @@ async function departmentStats(req, res, next) {
         const submittedShifts = filteredShifts.filter(s => s.submitted === true);
         const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`${month}/26/${year}`));
         const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`${month}/26/${year}`));
-        //const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`11/26/${year}`));    //oren
-        //const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`11/26/${year}`));  //oren
+       // const inTimeShifts = submittedShifts.filter(s => Date.parse(s.date) <= Date.parse(`11/26/${year}`));    //oren
+       // const notInTimeShifts = submittedShifts.filter(s => Date.parse(s.date) > Date.parse(`11/26/${year}`));  //oren
         if (!inTimeShifts)
             return res.status(httpCodes.OK).send(null);
         const inTimeRes = getStats('department', inTimeShifts);
         if (!inTimeRes)
             return res.status(httpCodes.OK).send(null);
+        
+        /*let notInTimeRes;
+        if(notInTimeShifts.length < 1){
+            notInTimeRes = {
+                maxID: 'none',
+                maxCount: 0
+            };
+        }
+        else{
+            notInTimeRes = getStats('department', notInTimeShifts);
+        }*/
+        
         const notInTimeRes = getStats('department', notInTimeShifts);
         if (!notInTimeRes)
             return res.status(httpCodes.OK).send(null);
@@ -188,6 +200,7 @@ function getFilteredShifts(shifts, month, year) {
     if (!dateFillteredShifts)
         return res.status(httpCodes.FORBIDDEN).send("no shifts");
     return dateFillteredShifts;
+    
 }
 //פונקציה שאנו משתמשים בה גם למרצה וגם למחלקה
 // פונקציה זו מקבלת מרצה/מחלקה וסוג הדיווח(מחלה,חופש,ביטול,דיווח בזמן,לא דיווח בזמן
