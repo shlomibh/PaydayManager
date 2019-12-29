@@ -100,6 +100,25 @@ async function getUserDetailsById(req, res, next) {
         next(error);
     }
 }
+
+// פונקציה שמחזירה את פרטי המשתמש באמצעות תעודת זהות
+async function getUserById(id) {
+    try {
+        console.log(id);
+
+        const user = await User.findOne({ //בודק אם קיים משתמש לפי התעודת הזהות שנמצאה
+            _id: id
+        }); // 
+        if (!user) {  // אם לא קיים משתמש כזה מחזיר ״ריק״
+            return null;
+        }
+        return user; //אחרת מחזיר את המשתמש במידה ונימצא
+    } catch (error) {
+        next(error);
+    }
+}
+
+
 //עדכון פרטי המשתמש הנוכחי-ניתן לעדכן רק מספר טלפון,תפקיד או מחלקה 
 async function updateUser(req, res, next) {
     try {
@@ -146,6 +165,7 @@ const usersControllers = {
     getUsersDepartment,
     getUserDetailsById,
     updateUser,
-    getLectors
+    getLectors,
+    getUserById
 };
 module.exports = usersControllers;
