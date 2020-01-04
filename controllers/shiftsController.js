@@ -14,9 +14,9 @@ async function postShift(req, res, next) {
         if (!user) return res.status(httpCodes.CONFLICT).send("there is no such user"); // אם לא קיים משתמש כזה מחזיר הודעה בהתאםה
         const department = user.department; //    המחלקה אליה שייך המשתמש והצבתו באובייקט של המשמרת     
         shift.department = department;
-        shift.lectorSubmitted = false;
-        shift.submitted = false;
-        shift.dateLectorSubmit = '';
+        shift.lectorSubmitted = false;//משתנה בוליאני-אם המרצה אישר את השעות או לא-בהתחלה הוא שקר-לא אישר את השעות
+        shift.submitted = false;// משתנה בוליאני-אם ראש המחלקה אישר את השעות או לא-בהתחלה הוא שקר -הראש מחלקה לא אישר את השעות
+        shift.dateLectorSubmit = '';// התאריך בו אישר המרצה את דיוחח השעות
         existedShift = await Shift.find({ employeeId: shift.employeeId, date: shift.date }); //מחפש את המשמרות הקיימות לפי המזהה של האובייקט של המשמרת והתאריך שניבחר
         if(existedShift.length > 0){ //בדיקה שאכן קיימת לפחות משמרת
             //טיפול בשתי מקרי קיצון שלא יכולים לקרות-המערכת רצה על כל איברי המערך-המשמרות-אם המשתמש דיווח על משמרת באותו יום ולאחר מכן רוצה לדווח על מחלה או חופש באותו תאריך המערכת תחזיר הודעת שגיאה ותדפיס שקימיים משמרות בתאריך הזה-מרצה לא יכול לדווח שהיה נוכח בעבודה וגם במחלה או בחופש

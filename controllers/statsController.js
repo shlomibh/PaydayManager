@@ -20,15 +20,23 @@ async function lectorStats(req, res, next) {
         const canceledShifts = filteredShifts.filter(s => s.absent === 'ביטול'); // משמרות שהופיע בהם ביטול
         if (!canceledShifts) // אם אין משמרות המופיעות כ״ביטול״ מחזיר תוכן הודעה ריק
             return res.status(httpCodes.OK).send(null);
+       
         let cFinalResult;
         if(canceledShifts.length < 1) {
           cFinalResult = null;  //בדיקה בקליינט קודם כל אם שונה מ NULL אחרת מציג אין נתונים.
         } else { 
-          const canceledRes = getArrayOfStats(canceledShifts);  
+        console.log(canceledShifts);
+          const canceledRes = getArrayOfStats(canceledShifts);
+          console.log(canceledRes)  ;
           const canceledStats = getMinMaxStats(canceledRes);
+          console.log('cancel');
+          console.log(canceledStats);
           const cmaxUser = await userController.getUserById(canceledStats.maxID);// מחזיר את כל פרטי המשתמש שהוא המקסימום
-          const cminUser = await userController.getUserById(canceledStats.minID);// מחזיר את כל פרטי המשתמש שהוא מינימום
-          cFinalResult = {   // מערך המחזיר את פרטי המשתמש ואת הכמות הגדולה/קטנה לפי הניתוח הסטטיסטי
+          const cminUser = await userController.getUserById(canceledStats.minID);         // מחזיר את כל פרטי המשתמש שהוא מינימום
+
+          cFinalResult = {   
+            
+          // מערך המחזיר את פרטי המשתמש ואת הכמות הגדולה/קטנה לפי הניתוח הסטטיסטי
               maxUser: cmaxUser, // שם המשתמש הכי גבוהה
               maxCount: canceledStats.maxCount,// הצגת הנתון הכי גבוהה
               minUser: cminUser,//שם המשתמש הכי נמוך
@@ -36,6 +44,9 @@ async function lectorStats(req, res, next) {
             };
         }
         finalArrayResult.push(cFinalResult);// הצגת המערך
+      
+        
+
         // מדובר בפונקציה הדומה לדוגמא הראשונה רק שמתייחסת לניתוח סטטיסטי הקשור ל״מחלה״
         const sickShifts = filteredShifts.filter(s => s.absent === 'מחלה');
         if (!sickShifts) // אם אין משמרות המופיעות כ״ביטול״ מחזיר תוכן הודעה ריק
@@ -46,6 +57,8 @@ async function lectorStats(req, res, next) {
         } else { 
         const sickRes = getArrayOfStats(sickShifts);  
         const sickStats = getMinMaxStats(sickRes);
+        console.log('sick');
+        console.log(sickStats);
         const smaxUser = await userController.getUserById(sickStats.maxID);// מחזיר את כל פרטי המשתמש שהוא המקסימום
         const sminUser = await userController.getUserById(sickStats.minID);// מחזיר את כל פרטי המשתמש שהוא מינימום
         sFinalResult = {   // מערך המחזיר את פרטי המשתמש ואת הכמות הגדולה/קטנה לפי הניתוח הסטטיסטי
@@ -70,7 +83,7 @@ async function lectorStats(req, res, next) {
         const ominUser = await userController.getUserById(offStats.minID);// מחזיר את כל פרטי המשתמש שהוא מינימום
         oFinalResult = {   // מערך המחזיר את פרטי המשתמש ואת הכמות הגדולה/קטנה לפי הניתוח הסטטיסטי
             maxUser: omaxUser, // שם המשתמש הכי גבוהה
-            maxCount: offStats.maxCount, // הצגת הנתון הכי גבוהה
+            maxCount: offStats.maxCount,// הצגת הנתון הכי גבוהה
             minUser: ominUser,//שם המשתמש הכי נמוך
             minCount: offStats.minCount //הצגת הנתון הכי נמוך
             };
@@ -162,24 +175,22 @@ async function departmentStats(req, res, next) {
         const canceledShifts = filteredShifts.filter(s => s.absent === 'ביטול');
         if (!canceledShifts)
             return res.status(httpCodes.OK).send(null);
-        const canceledRes = getStats('department', canceledShifts); //     getStats שימוש בפונקציה   
-        if (!canceledRes)
-            return res.status(httpCodes.OK).send(null);
-
-        let cFinalResult;
-        if(canceledShifts.length < 1) {
-        cFinalResult = null;  //בדיקה בקליינט קודם כל אם שונה מ NULL אחרת מציג אין נתונים.
-        } else { 
-        const canceledRes = getArrayOfStatsOfDepartment(canceledShifts);  
-        const canceledStats = getMinMaxStats(canceledRes);
-        cFinalResult = {   // מערך המחזיר את פרטי המשתמש ואת הכמות הגדולה/קטנה לפי הניתוח הסטטיסטי
-            maxID: canceledStats.maxID, // שם המשתמש הכי גבוהה
-            maxCount: canceledStats.maxCount,// הצגת הנתון הכי גבוהה
-            minID: canceledStats.minID,//שם המשתמש הכי נמוך
-            minCount: canceledStats.minCount //הצגת הנתון הכי נמוך
-            };
-        }
-        finalArrayResultdep.push(cFinalResult);// הצגת המערך
+            let cFinalResult;
+            if(canceledShifts.length < 1) {
+            cFinalResult = null;  //בדיקה בקליינט קודם כל אם שונה מ NULL אחרת מציג אין נתונים.
+            } else { 
+            const canceledRes = getArrayOfStatsOfDepartment(canceledShifts);  
+            const canceledStats = getMinMaxStats(canceledRes);
+            cFinalResult = {   // מערך המחזיר את פרטי המשתמש ואת הכמות הגדולה/קטנה לפי הניתוח הסטטיסטי
+                maxID: canceledStats.maxID, // שם המשתמש הכי גבוהה
+                maxCount: canceledStats.maxCount,// הצגת הנתון הכי גבוהה
+                minID: canceledStats.minID,//שם המשתמש הכי נמוך
+                minCount: canceledStats.minCount //הצגת הנתון הכי נמוך
+                };
+            }
+            finalArrayResultdep.push(cFinalResult);// הצגת המערך
+    
+    
 
 
         // בדומה לפונקציה הקודמת רק לפי הניתוח הסטטיסטי של ״מחלה״
@@ -289,17 +300,17 @@ async function departmentStats(req, res, next) {
     }
 }
 //פונקציה שמחזירה את כל המשמרות לפי חודש ושנה שניבחרו ע״י המשתמש
-function getFilteredShifts(shifts, month, year) {
+//function getFilteredShifts(shifts, month, year) {
     // month='11'; //need to remove!!!!
-    const filterredShifts = shifts.filter(s => s.date.split('/')[0] === month); /// ״מסנן משמרות לפי חודש :הפונקציה לוקחת את התאריך שהתקבל ומפרקת אותה למערך לפי התו ומחזירה את הערך שבמקום הראשון    Shlomi: [0]
-    if (!filterredShifts)
-        return res.status(httpCodes.FORBIDDEN).send("no shifts");
-    const dateFillteredShifts = filterredShifts.filter(s => s.date.split('/')[2] === year);
-    if (!dateFillteredShifts)
-        return res.status(httpCodes.FORBIDDEN).send("no shifts");
-    return dateFillteredShifts;
+  //  const filterredShifts = shifts.filter(s => s.date.split('/')[0] === month); /// ״מסנן משמרות לפי חודש :הפונקציה לוקחת את התאריך שהתקבל ומפרקת אותה למערך לפי התו ומחזירה את הערך שבמקום הראשון    Shlomi: [0]
+    //if (!filterredShifts)
+      //  return res.status(httpCodes.FORBIDDEN).send("no shifts");
+    //const dateFillteredShifts = filterredShifts.filter(s => s.date.split('/')[2] === year);
+    //if (!dateFillteredShifts)
+      //  return res.status(httpCodes.FORBIDDEN).send("no shifts");
+    //return dateFillteredShifts;
     
-}
+//}
 
 //פונקציה שמחזירה את כל המשמרות לפי חודש ושנה שניבחרו ע״י המשתמש
 function getFilteredShifts(shifts, month, year) {
@@ -368,7 +379,8 @@ function getArrayOfStats(shifts){
     });
     const stats = [];
     let stat = statsList[0];
-    let count = 0;
+    flag = false;
+    stat.count = 0;
     statsList.forEach(element => {
         if(element.id !== stat.id){
             stats.push(stat);
@@ -378,6 +390,14 @@ function getArrayOfStats(shifts){
             stat.count += 1;
         }
     });
+    stats.forEach(element => {
+        if(element.id === stat.id){
+            flag = true;
+        }
+    });
+    if(!flag){
+        stats.push(stat);
+    }
     stats.sort(compareStats);
     if(stats.length < 1) {
         return statsList;
@@ -414,7 +434,8 @@ function getArrayOfStatsOfDepartment(shifts){
     });
     const stats = [];
     let stat = statsList[0];
-    let count = 0;
+    stat.count = 0;
+    flag = false;
     statsList.forEach(element => {
         if(element.id !== stat.id){
             stats.push(stat);
@@ -424,6 +445,14 @@ function getArrayOfStatsOfDepartment(shifts){
             stat.count += 1;
         }
     });
+    stats.forEach(element => {
+        if(element.id === stat.id){
+            flag = true;
+        }
+    });
+    if(!flag){
+        stats.push(stat);
+    }
     stats.sort(compareStats);
     if(stats.length < 1) {
         return statsList;
