@@ -88,7 +88,8 @@ async function getShifts(req, res, next) {
             next(error);
         }
     }
-// פונקציה שבודקת אם המשתמש -המרצה-אישר את כל המשמרות ושומרת את התאריך שאישר
+    // פונקציה הקשורה לראש מחלקה-הכפתור בו הראש מחלקה מאשר את הדיווחים של המרצה שתחתיו,במידה והמרצה לא אישר הראש מחלקה מאשר
+// 
     async function submitAll(req, res, next) {
         try {
            const employeeId = req.body.employeeId; //תעודת זהות של המשתמש

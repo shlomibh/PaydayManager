@@ -25,12 +25,12 @@ async function lectorStats(req, res, next) {
         if(canceledShifts.length < 1) {
           cFinalResult = null;  //בדיקה בקליינט קודם כל אם שונה מ NULL אחרת מציג אין נתונים.
         } else { 
-        console.log(canceledShifts);
-          const canceledRes = getArrayOfStats(canceledShifts);
-          console.log(canceledRes)  ;
-          const canceledStats = getMinMaxStats(canceledRes);
-          console.log('cancel');
-          console.log(canceledStats);
+       
+          const canceledRes = getArrayOfStats(canceledShifts);// הסבר בפונקציה
+          
+          const canceledStats = getMinMaxStats(canceledRes);// מחזיר את הנתונים הכי גבוהים והכי נמוכים
+          
+          
           const cmaxUser = await userController.getUserById(canceledStats.maxID);// מחזיר את כל פרטי המשתמש שהוא המקסימום
           const cminUser = await userController.getUserById(canceledStats.minID);         // מחזיר את כל פרטי המשתמש שהוא מינימום
 
@@ -44,7 +44,8 @@ async function lectorStats(req, res, next) {
             };
         }
         finalArrayResult.push(cFinalResult);// הצגת המערך
-      
+      console.log (cFinalResult);
+      console.log ("shhhhhh");
         
 
         // מדובר בפונקציה הדומה לדוגמא הראשונה רק שמתייחסת לניתוח סטטיסטי הקשור ל״מחלה״
@@ -89,7 +90,8 @@ async function lectorStats(req, res, next) {
             };
         }
         finalArrayResult.push(oFinalResult);// הצגת
-
+         console.log (oFinalResult);
+         console.log ("shh");
         // פונקציה הדומה לפונקציה הראשונה רק שמתייחסת לניתוח הסטטיסטי לפי ״דיווח בזמן או ״דיווח לא בזמן״
         // הגדרה של דיווח בזמן הינה לפי התאריך שבה המשתמש אישר את המשמרות שלו-אם אישר עד ה26 לחודש או לפני דיווח בזמן אם אחרי לא דיווח בזמן
         // מחזיר את פרטי המשתמש שדיווח בזמן /לא דיווח בזמן
@@ -300,17 +302,17 @@ async function departmentStats(req, res, next) {
     }
 }
 //פונקציה שמחזירה את כל המשמרות לפי חודש ושנה שניבחרו ע״י המשתמש
-//function getFilteredShifts(shifts, month, year) {
-    // month='11'; //need to remove!!!!
-  //  const filterredShifts = shifts.filter(s => s.date.split('/')[0] === month); /// ״מסנן משמרות לפי חודש :הפונקציה לוקחת את התאריך שהתקבל ומפרקת אותה למערך לפי התו ומחזירה את הערך שבמקום הראשון    Shlomi: [0]
-    //if (!filterredShifts)
-      //  return res.status(httpCodes.FORBIDDEN).send("no shifts");
-    //const dateFillteredShifts = filterredShifts.filter(s => s.date.split('/')[2] === year);
-    //if (!dateFillteredShifts)
-      //  return res.status(httpCodes.FORBIDDEN).send("no shifts");
-    //return dateFillteredShifts;
+function getFilteredShifts(shifts, month, year) {
+    month='11'; //need to remove!!!!
+    const filterredShifts = shifts.filter(s => s.date.split('/')[0] === month); /// ״מסנן משמרות לפי חודש :הפונקציה לוקחת את התאריך שהתקבל ומפרקת אותה למערך לפי התו ומחזירה את הערך שבמקום הראשון    Shlomi: [0]
+    if (!filterredShifts)
+       return res.status(httpCodes.FORBIDDEN).send("no shifts");
+    const dateFillteredShifts = filterredShifts.filter(s => s.date.split('/')[2] === year);
+    if (!dateFillteredShifts)
+        return res.status(httpCodes.FORBIDDEN).send("no shifts");
+    return dateFillteredShifts;
     
-//}
+}
 
 //פונקציה שמחזירה את כל המשמרות לפי חודש ושנה שניבחרו ע״י המשתמש
 function getFilteredShifts(shifts, month, year) {
@@ -334,7 +336,7 @@ function compareStats(a,b) {
   }
   return 0;
 }
-
+//פונקציה המחזירה  את הפרטים והכמות של המקום הראשון והאחרון במערך
 function getMinMaxStats(stats){
   const statsResult = {
     maxID: String,
@@ -342,14 +344,16 @@ function getMinMaxStats(stats){
     minID: String,
     min: Number
   };
-  stats = stats.sort(compareStats);
-  statsResult.maxID = stats[0].id;
-  statsResult.maxCount = stats[0].count;
-  statsResult.minID = stats[stats.length-1].id;
-  statsResult.minCount = stats[stats.length-1].count;
-  return statsResult;
+  stats = stats.sort(compareStats);// מיון המערך 
+  statsResult.maxID = stats[0].id;//    הראשון המופיע במערך ID 
+  statsResult.maxCount = stats[0].count; //הסוכם הכי גבוהה המופיע במערך
+  statsResult.minID = stats[stats.length-1].id; // האחרון המופיע במערך id
+  statsResult.minCount = stats[stats.length-1].count; // הסוכם הכי נמוך במערך
+  return statsResult; // האובייקט הסופי שנישלח
 }
-
+//         המערך של סטטיסטיקה -מקבל בעצם מערך לפי ניתוח סטטיסטי בשלב הראשוני ממיין אותו לפי מזהה המשתמש בסדר עולהלאחר מכן עובר עלו שוב כאשר ישנו מזהה אותו דבר הוא מתחיל לספור   
+//כאשר המזהה אינו דומה הוא עובר לאינדקס הבא ובודק שוב.סיבוכיות יותר נמוכה מאשר לעשות מערך לפי מזהים ולספור כל אחד בניפרד
+// המשך הפונקציה הבאה היא בעצם טיפול ב״באג״ שהיה שגרם לכפילות של מזהה והיתי צריך לעבור על זה שוב
 function getArrayOfStats(shifts){
     let dataToPush = {
         id: String,
@@ -358,16 +362,16 @@ function getArrayOfStats(shifts){
     const statsList = [];
     let index;
     let flag = false;
-    shifts.sort(compareShifts);
+    shifts.sort(compareShifts);//    id    מקבל מערך ממוין לפי מזהה   
   shifts.forEach(element => {
       flag = false;
-        if(statsList.length < 1){
+        if(statsList.length < 1){ // אתחול המערך כאשר הוא ריק בהתחלה
             statsList.push({id: element.employeeId, count: 1});
         }  
         else{
             statsList.forEach(elem => {
-                if(`${element.id}` === `${elem.employeeId}`){
-                    statsList[index].count += 1;
+                if(`${element.id}` === `${elem.employeeId}`){ //מוודא שהמזהה של העובד הקיים זהה למזהה שנימצא במערך
+                    statsList[index].count += 1; // מקדם את הסוכם ב1
                     flag = true;
                 }
                 index += 1;
@@ -459,7 +463,7 @@ function getArrayOfStatsOfDepartment(shifts){
     }
     return stats;
 }
-
+//  על מערך אובייקטים-מסדרת את המשמרות לפי המזהה של העובד בסדר עולה -המזהה הוא מחרוזת והיא בעצם עושה את פעולתה קומפרטור שממיין sort פונקציה שעושה 
 function compareShifts(a, b){
   if(a.employeeId > b.employeeId) {
     return 1;
@@ -580,7 +584,7 @@ async function getLectorsStats(req, res, next) {
                 updatedDelayed.push(fullLec);
             }
         });
-        // האובייקט הסופי
+      
         updatedInTime.forEach(element => {
             updatedDelayed.forEach(elem => {
                 if(element._id === elem._id){
@@ -589,6 +593,7 @@ async function getLectorsStats(req, res, next) {
             });
             
         });
+          // האובייקט הסופי
         const dataToSend = {
             inTime: updatedInTime,
             delayed: updatedDelayed

@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const User = mongoose.model("User");
 const { ExtractJwt } = require("passport-jwt");
 const secret = require("../config/keys").secret;
-// הדרך שבה יתבצע אימות המשתמש.
+//    (הגנה) הדרך שבה יתבצע אימות המשתמש.
 //     יחד עם החתימה  header authorization שלו מה jwt כאשר המשתמש שולח בקשה לשרת להתחבר באמצעות שם משתמש וסיסמא -מחלצים את ה   
 //לאחר מכן ניגשים לפרטים של המשתמש והשרת בודק אם קיים מזהה למשתמש ששלח את הבקשה
 //אם קיים מזהה כזה השרת מחזיר את המשתמש ואם לא מחזיר הודעת שגיאה
